@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { QuizAttempt } from '../../types';
 import { getAccessToken } from '../../lib/auth-client';
+import { ErrorRetry } from './ErrorRetry';
 
 interface QuizHistoryProps {
   userId: string;
@@ -11,6 +12,7 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const limit = 10;
 
   useEffect(() => {
@@ -18,9 +20,14 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
   }, [page]);
 
   const loadAttempts = async () => {
+    setError(null);
     try {
       const token = getAccessToken();
-      if (!token) return;
+      if (!token) {
+        setError('请先登录');
+        setLoading(false);
+        return;
+      }
 
       const response = await fetch(`/api/attempts/history?page=${page}&limit=${limit}`, {
         headers: {
@@ -32,9 +39,14 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
         const { attempts: data, total: totalCount } = await response.json();
         setAttempts(data || []);
         setTotal(totalCount || 0);
+      } else if (response.status === 401) {
+        setError('登录已过期，请重新登录');
+      } else {
+        setError('加载失败');
       }
-    } catch (error) {
-      console.error('Error loading attempts:', error);
+    } catch (err) {
+      console.error('Error loading attempts:', err);
+      setError('网络错误，请检查网络连接');
     } finally {
       setLoading(false);
     }
@@ -71,9 +83,29 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-        <p className="mt-2 text-gray-600">加载中...</p>
+      <div className="animate-fade-in">
+        <h1 className="text-2xl font-bold mb-6">
+          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+        </h1>
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-12 bg-gray-100 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold mb-6">答题历史</h1>
+        <ErrorRetry
+          message={error}
+          onRetry={() => { setLoading(true); loadAttempts(); }}
+        />
       </div>
     );
   }
@@ -88,8 +120,8 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">习题</th>

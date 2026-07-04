@@ -21,6 +21,8 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
   const [quiz, setQuiz] = useState(initialQuiz || { title: '', description: '', tags: [] });
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [isSaving, setIsSaving] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -65,13 +67,16 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
   };
 
   const handleSave = async () => {
+    setValidationError(null);
+    setSaveError(null);
+
     if (!quiz.title.trim()) {
-      alert('请输入习题标题');
+      setValidationError('请输入习题标题');
       return;
     }
 
     if (questions.length === 0) {
-      alert('请至少添加一道题目');
+      setValidationError('请至少添加一道题目');
       return;
     }
 
@@ -80,7 +85,7 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
       await onSave(quiz, questions);
     } catch (error) {
       console.error('Save error:', error);
-      alert('保存失败，请重试');
+      setSaveError('保存失败，请重试');
     } finally {
       setIsSaving(false);
     }
@@ -129,7 +134,8 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">题目 ({questions.length})</h2>
-          <div className="flex space-x-2">
+          {/* Desktop: inline buttons */}
+          <div className="hidden md:flex space-x-2">
             <button
               type="button"
               onClick={() => addQuestion('single_choice')}
@@ -166,6 +172,24 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
               + 简答题
             </button>
           </div>
+          {/* Mobile: dropdown */}
+          <select
+            className="md:hidden px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            onChange={(e) => {
+              if (e.target.value) {
+                addQuestion(e.target.value as QuestionType);
+                e.target.value = '';
+              }
+            }}
+            defaultValue=""
+          >
+            <option value="" disabled>+ 添加题目</option>
+            <option value="single_choice">单选题</option>
+            <option value="multiple_choice">多选题</option>
+            <option value="true_false">判断题</option>
+            <option value="fill_blank">填空题</option>
+            <option value="short_answer">简答题</option>
+          </select>
         </div>
 
         {questions.length === 0 ? (
@@ -193,7 +217,20 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end space-x-4">
+      <div className="space-y-3">
+        {/* Validation / save error */}
+        {validationError && (
+          <div className="p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg text-sm">
+            {validationError}
+          </div>
+        )}
+        {saveError && (
+          <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center justify-between">
+            <span>{saveError}</span>
+            <button onClick={() => setSaveError(null)} className="text-red-400 hover:text-red-600">&times;</button>
+          </div>
+        )}
+        <div className="flex justify-end space-x-4">
         <button
           type="button"
           onClick={onCancel}
@@ -209,6 +246,7 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
         >
           {isSaving ? '保存中...' : '保存习题'}
         </button>
+      </div>
       </div>
     </div>
   );

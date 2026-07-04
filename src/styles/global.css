@@ -76,3 +76,27 @@
 .animate-slide-up {
   animation: slideUp 0.3s ease-in-out;
 }
+
+/* Mobile touch improvements */
+@media (max-width: 768px) {
+  /* Larger touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Smooth momentum scrolling for iOS */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}

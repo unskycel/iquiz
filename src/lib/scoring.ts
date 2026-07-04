@@ -71,15 +71,67 @@ function gradeTrueFalse(
 
 function gradeFillBlank(
   correctAnswer: string,
-  userAnswer: string,
+  userAnswer: string | string[],
   points: number
 ): { isCorrect: boolean; pointsAwarded: number } {
-  // Case-insensitive, trim whitespace
-  const normalizedCorrect = correctAnswer.toLowerCase().trim();
-  const normalizedUser = userAnswer.toLowerCase().trim();
-  
+  // Multi-blank fill-in: correct_answer stored as JSON array string e.g. '["空1","空2"]'
+  const parsedCorrect = parseFillBlankAnswer(correctAnswer);
+  const isMultiBlank = Array.isArray(parsedCorrect);
+
+  if (isMultiBlank) {
+    return gradeMultiBlankFill(parsedCorrect as string[], userAnswer, points);
+  }
+
+  // Single blank: simple case-insensitive comparison
+  const normalizedCorrect = (parsedCorrect as string).toLowerCase().trim();
+  const normalizedUser = (typeof userAnswer === 'string' ? userAnswer : userAnswer[0] || '').toLowerCase().trim();
   const isCorrect = normalizedCorrect === normalizedUser;
   return { isCorrect, pointsAwarded: isCorrect ? points : 0 };
+}
+
+/**
+ * Parse fill_blank correct_answer — may be a plain string or a JSON array string
+ */
+function parseFillBlankAnswer(raw: string): string | string[] {
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((s: unknown) => String(s));
+      }
+    } catch { /* fall through to plain string */ }
+  }
+  return raw;
+}
+
+/**
+ * Grade multi-blank fill-in with partial credit per blank
+ */
+function gradeMultiBlankFill(
+  correctAnswers: string[],
+  userAnswer: string | string[],
+  points: number
+): { isCorrect: boolean; pointsAwarded: number } {
+  // Normalize user answer to array
+  const userAnswers: string[] = Array.isArray(userAnswer)
+    ? userAnswer
+    : (typeof userAnswer === 'string' ? [userAnswer] : []);
+
+  const blankCount = correctAnswers.length;
+  let correctCount = 0;
+
+  for (let i = 0; i < blankCount; i++) {
+    const correct = correctAnswers[i].toLowerCase().trim();
+    const user = (userAnswers[i] || '').toLowerCase().trim();
+    if (correct === user) correctCount++;
+  }
+
+  const allCorrect = correctCount === blankCount;
+  const pointsPerBlank = points / blankCount;
+  const pointsAwarded = Math.round(correctCount * pointsPerBlank);
+
+  return { isCorrect: allCorrect, pointsAwarded };
 }
 
 function gradeShortAnswer(

@@ -20,7 +20,7 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-gray-50">
-    <nav class="bg-white shadow-sm">
+    <nav class="bg-white shadow-sm relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
@@ -35,6 +35,9 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <slot />
     </main>
+    <div id="offline-banner" class="hidden fixed bottom-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 text-sm z-50">
+      当前处于离线状态，部分功能可能不可用
+    </div>
     <footer class="bg-white border-t mt-auto">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <p class="text-center text-gray-500 text-sm">© 2025 iQuiz 保留所有权利</p>
@@ -42,3 +45,18 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     </footer>
   </body>
 </html>
+
+<script>
+  // Online/offline detection
+  const banner = document.getElementById('offline-banner');
+  function updateOnlineStatus() {
+    if (navigator.onLine) {
+      banner?.classList.add('hidden');
+    } else {
+      banner?.classList.remove('hidden');
+    }
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  if (!navigator.onLine) updateOnlineStatus();
+</script>

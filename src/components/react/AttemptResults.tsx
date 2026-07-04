@@ -15,6 +15,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
   const [data, setData] = useState<AttemptData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAttempt();
@@ -52,6 +53,18 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
     return `${mins}分${secs}秒`;
   };
 
+  const formatCorrectAnswer = (raw: string | string[]): string => {
+    if (typeof raw === 'string' && raw.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map((v: string, i: number) => `空${i + 1}: ${v}`).join('；');
+        }
+      } catch { /* fall through */ }
+    }
+    return String(raw);
+  };
+
   const getScorePercentage = (score: number, totalPoints: number): number => {
     return totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
   };
@@ -80,7 +93,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Export error:', error);
-      alert('导出失败');
+      setExportError('导出失败，请重试');
     }
   };
 
@@ -127,6 +140,12 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
             导出 PDF
           </button>
         </div>
+        {exportError && (
+          <div className="mt-3 p-2 bg-red-50 border border-red-200 text-red-600 rounded text-sm flex items-center justify-between">
+            <span>{exportError}</span>
+            <button onClick={() => setExportError(null)} className="text-red-400 hover:text-red-600 ml-2">&times;</button>
+          </div>
+        )}
       </div>
 
       {/* Score Summary */}
@@ -167,6 +186,9 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
             correctAnswer = (question.correct_answer as string[]).join(', ');
           } else if (question.type === 'true_false') {
             correctAnswer = question.correct_answer as string;
+          } else if (question.type === 'fill_blank') {
+            // May be JSON array string for multi-blank
+            correctAnswer = formatCorrectAnswer(question.correct_answer);
           } else {
             correctAnswer = question.correct_answer as string;
           }

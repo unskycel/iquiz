@@ -23,6 +23,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
   const [answers, setAnswers] = useState<Map<string, string | string[]>>(new Map());
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Load quiz data if quizId is provided
   useEffect(() => {
@@ -123,6 +124,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     if (!confirm('确定要提交吗？')) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       // Create attempt via API
       const response = await fetch('/api/attempts', {
@@ -161,7 +163,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       onComplete(completedAttempt, answers);
     } catch (error) {
       console.error('Submit error:', error);
-      alert('提交失败，请重试');
+      setSubmitError('提交失败，请检查网络后重试');
     } finally {
       setIsSubmitting(false);
     }
@@ -171,6 +173,23 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  /**
+   * Get the number of blanks for a fill_blank question.
+   * If correct_answer is a JSON array string like '["空1","空2"]', return its length.
+   * Otherwise return 1 (single blank).
+   */
+  const getBlankCount = (correctAnswer: string | string[]): number => {
+    if (typeof correctAnswer === 'string' && correctAnswer.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(correctAnswer);
+        if (Array.isArray(parsed) && parsed.length > 1) {
+          return parsed.length;
+        }
+      } catch { /* fall through */ }
+    }
+    return 1;
   };
 
   const renderQuestion = () => {
@@ -285,6 +304,34 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         );
 
       case 'fill_blank':
+        const blankCount = getBlankCount(currentQuestion.correct_answer);
+        if (blankCount > 1) {
+          // Multi-blank fill-in
+          const blankAnswers = (currentAnswer as string[]) || new Array(blankCount).fill('');
+          return (
+            <div className="space-y-3">
+              {Array.from({ length: blankCount }, (_, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-500 w-10 flex-shrink-0">
+                    空{i + 1}
+                  </span>
+                  <input
+                    type="text"
+                    value={blankAnswers[i] || ''}
+                    onChange={(e) => {
+                      const newAnswers = [...blankAnswers];
+                      newAnswers[i] = e.target.value;
+                      handleAnswerChange(newAnswers);
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    placeholder={`输入第 ${i + 1} 个空`}
+                  />
+                </div>
+              ))}
+            </div>
+          );
+        }
+        // Single blank
         return (
           <input
             type="text"
@@ -386,10 +433,23 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         </div>
       </div>
 
+      {/* Submit error */}
+      {submitError && (
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center justify-between">
+          <span>{submitError}</span>
+          <button
+            onClick={() => setSubmitError(null)}
+            className="text-red-400 hover:text-red-600 ml-2"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Question Navigator */}
       <div className="mt-6 bg-white rounded-lg shadow-sm p-4">
         <h3 className="text-sm font-medium text-gray-700 mb-3">题目导航</h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
           {questions.map((q, index) => (
             <button
               key={q.id}
