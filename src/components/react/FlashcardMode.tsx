@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Question, QuestionType } from '../../types';
 import { getAccessToken } from '../../lib/auth-client';
 
@@ -15,6 +15,9 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set()); // 用户点击的选项 id
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const mouseStartX = useRef<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -203,8 +206,33 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
 
       {/* Flashcard */}
       <div
-        className="bg-white rounded-lg shadow-sm p-8 mb-6 min-h-[300px] cursor-pointer select-none"
-        onClick={() => setShowAnswer(!showAnswer)}
+        className="bg-white rounded-lg shadow-sm p-8 mb-6 min-h-[300px] select-none touch-pan-y"
+        onTouchStart={(e) => {
+          touchStartX.current = e.touches[0].clientX;
+          touchStartY.current = e.touches[0].clientY;
+        }}
+        onTouchEnd={(e) => {
+          if (touchStartX.current === null) return;
+          const dx = e.changedTouches[0].clientX - touchStartX.current;
+          const dy = e.changedTouches[0].clientY - touchStartY.current!;
+          if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0 && currentIndex > 0) setCurrentIndex(currentIndex - 1);
+            else if (dx < 0 && currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1);
+          }
+          touchStartX.current = null;
+        }}
+        onMouseDown={(e) => {
+          mouseStartX.current = e.clientX;
+        }}
+        onMouseUp={(e) => {
+          if (mouseStartX.current === null) return;
+          const dx = e.clientX - mouseStartX.current;
+          if (Math.abs(dx) > 80) {
+            if (dx > 0 && currentIndex > 0) setCurrentIndex(currentIndex - 1);
+            else if (dx < 0 && currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1);
+          }
+          mouseStartX.current = null;
+        }}
       >
         {/* 题型 + 分值 */}
         <div className="flex items-center gap-3 mb-4">
@@ -320,43 +348,65 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         })()}
 
         {/* 答案区 */}
-        <div className="border-t pt-6">
-          {showAnswer ? (
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-sm font-medium text-green-600">✓ 正确答案</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowAnswer(false);
-                  }}
-                  className="text-xs text-gray-400 hover:text-gray-600"
-                >
-                  点击隐藏
-                </button>
+        {/* 选择题/判断题：选了选项后自动展示答案+解析 */}
+        {((currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice' || currentQuestion.type === 'true_false') && selectedOptions.size > 0) &&
+          currentQuestion.explanation && (
+            <div className="border-t pt-6">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                💡 {currentQuestion.explanation}
               </div>
-              <div className="text-base">
-                {formatAnswer(currentQuestion)}
-              </div>
-              {currentQuestion.explanation && (
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-                  💡 {currentQuestion.explanation}
+            </div>
+          )
+        }
+
+        {/* 填空题/简答题：点击翻面看答案 */}
+        {(currentQuestion.type === 'fill_blank' || currentQuestion.type === 'short_answer') && (
+          <div className="border-t pt-6">
+            {showAnswer ? (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm font-medium text-green-600">✓ 正确答案</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowAnswer(false);
+                    }}
+                    className="text-xs text-gray-400 hover:text-gray-600"
+                  >
+                    点击隐藏
+                  </button>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-400">
-              <div className="text-4xl mb-2">👁</div>
-              <p className="text-sm">点击卡片查看答案</p>
-            </div>
-          )}
-        </div>
+                <div className="text-base">
+                  {formatAnswer(currentQuestion)}
+                </div>
+                {currentQuestion.explanation && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                    💡 {currentQuestion.explanation}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAnswer(true);
+                }}
+                className="w-full text-center py-6 text-gray-400 hover:text-gray-600"
+              >
+                <div className="text-4xl mb-2">👁</div>
+                <p className="text-sm">点击查看答案</p>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Navigation */}
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-500">
-          {showAnswer ? '答案已显示' : '答案已隐藏'}
+          ← 左滑上题 · 右滑下题 →
         </div>
         <div className="flex space-x-3">
           <button
