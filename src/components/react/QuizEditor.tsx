@@ -1,0 +1,215 @@
+import React, { useState, useCallback } from 'react';
+import type { Question, QuestionType, QuestionOption } from '../../types';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableItem } from './SortableItem';
+import { QuestionForm } from './QuestionForm';
+
+interface QuizEditorProps {
+  initialQuiz?: {
+    id?: string;
+    title: string;
+    description?: string;
+    tags: string[];
+  };
+  initialQuestions?: Question[];
+  onSave: (quiz: any, questions: any[]) => Promise<void>;
+  onCancel: () => void;
+}
+
+export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCancel }: QuizEditorProps) {
+  const [quiz, setQuiz] = useState(initialQuiz || { title: '', description: '', tags: [] });
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = useCallback((event: any) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      setQuestions((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        // Update order indices
+        return newItems.map((item, index) => ({ ...item, order_index: index + 1 }));
+      });
+    }
+  }, []);
+
+  const addQuestion = (type: QuestionType) => {
+    const newQuestion: Question = {
+      id: `temp-${Date.now()}`,
+      quiz_id: '',
+      type,
+      content: '',
+      order_index: questions.length + 1,
+      correct_answer: type === 'multiple_choice' ? [] : '',
+      points: 1,
+      created_at: new Date().toISOString(),
+    };
+    setQuestions([...questions, newQuestion]);
+  };
+
+  const updateQuestion = (index: number, updatedQuestion: Partial<Question>) => {
+    setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, ...updatedQuestion } : q)));
+  };
+
+  const deleteQuestion = (index: number) => {
+    setQuestions((prev) => prev.filter((_, i) => i !== index).map((q, i) => ({ ...q, order_index: i + 1 })));
+  };
+
+  const handleSave = async () => {
+    if (!quiz.title.trim()) {
+      alert('请输入习题标题');
+      return;
+    }
+
+    if (questions.length === 0) {
+      alert('请至少添加一道题目');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await onSave(quiz, questions);
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('保存失败，请重试');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Quiz Info */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">基本信息</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">习题标题 *</label>
+            <input
+              type="text"
+              value={quiz.title}
+              onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              placeholder="输入习题标题"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <textarea
+              value={quiz.description || ''}
+              onChange={(e) => setQuiz({ ...quiz, description: e.target.value })}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              placeholder="输入习题描述（可选）"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+            <input
+              type="text"
+              value={quiz.tags.join(', ')}
+              onChange={(e) => setQuiz({ ...quiz, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              placeholder="用逗号分隔多个标签"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Questions */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">题目 ({questions.length})</h2>
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={() => addQuestion('single_choice')}
+              className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200"
+            >
+              + 单选题
+            </button>
+            <button
+              type="button"
+              onClick={() => addQuestion('multiple_choice')}
+              className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
+            >
+              + 多选题
+            </button>
+            <button
+              type="button"
+              onClick={() => addQuestion('true_false')}
+              className="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200"
+            >
+              + 判断题
+            </button>
+            <button
+              type="button"
+              onClick={() => addQuestion('fill_blank')}
+              className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200"
+            >
+              + 填空题
+            </button>
+            <button
+              type="button"
+              onClick={() => addQuestion('short_answer')}
+              className="px-3 py-1 text-sm bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200"
+            >
+              + 简答题
+            </button>
+          </div>
+        </div>
+
+        {questions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            点击上方按钮添加题目
+          </div>
+        ) : (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={questions.map(q => q.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-4">
+                {questions.map((question, index) => (
+                  <SortableItem key={question.id} id={question.id}>
+                    <QuestionForm
+                      question={question}
+                      index={index}
+                      onUpdate={(updates) => updateQuestion(index, updates)}
+                      onDelete={() => deleteQuestion(index)}
+                    />
+                  </SortableItem>
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-end space-x-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          取消
+        </button>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+        >
+          {isSaving ? '保存中...' : '保存习题'}
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,11 @@
+# Default code owners
+* @your-github-username
+
+# API routes
+/src/api/ @your-github-username
+
+# React components
+/src/components/react/ @your-github-username
+
+# Database migrations
+/supabase/ @your-github-username

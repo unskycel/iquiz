@@ -1,0 +1,30 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title = 'iQuiz - 登录' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <a href="/" class="text-3xl font-bold text-indigo-600">iQuiz</a>
+        <p class="mt-2 text-gray-600">你的资料习题</p>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-8">
+        <slot />
+      </div>
+    </div>
+  </body>
+</html>
