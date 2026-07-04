@@ -19,7 +19,7 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
-  <body class="min-h-screen bg-gray-50">
+  <body class="min-h-screen flex flex-col bg-gray-50">
     <nav class="bg-white shadow-sm relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -32,7 +32,7 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
         </div>
       </div>
     </nav>
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
       <slot />
     </main>
     <div id="offline-banner" class="hidden fixed bottom-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 text-sm z-50">
