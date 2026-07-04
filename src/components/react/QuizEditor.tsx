@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import type { Question, QuestionType, QuestionOption } from '../../types';
+import { validateQuiz, hasValidationErrors, countQuestionErrors, getFirstErrorIndex, type QuestionError } from '../../lib/validation';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableItem } from './SortableItem';
@@ -23,6 +24,7 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
   const [isSaving, setIsSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [questionErrors, setQuestionErrors] = useState<(QuestionError | null)[]>([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -45,6 +47,7 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
   }, []);
 
   const addQuestion = (type: QuestionType) => {
+    setQuestionErrors([]);
     const newQuestion: Question = {
       id: `temp-${Date.now()}`,
       quiz_id: '',
@@ -60,23 +63,62 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
 
   const updateQuestion = (index: number, updatedQuestion: Partial<Question>) => {
     setQuestions((prev) => prev.map((q, i) => (i === index ? { ...q, ...updatedQuestion } : q)));
+    // 清除该题的验证错误
+    setQuestionErrors((prev) => prev.map((e, i) => (i === index ? null : e)));
   };
 
   const deleteQuestion = (index: number) => {
     setQuestions((prev) => prev.filter((_, i) => i !== index).map((q, i) => ({ ...q, order_index: i + 1 })));
+    setQuestionErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSave = async () => {
     setValidationError(null);
     setSaveError(null);
 
-    if (!quiz.title.trim()) {
-      setValidationError('请输入习题标题');
+    // 收集每道题的选项（从 DOM 或 state 无法直接拿到，需要通过 QuestionForm 暴露）
+    // 这里用一个 ref map 来收集 options
+    // 但当前架构下 QuestionForm 内部管理 options state，我们需要换个思路：
+    // 通过 questions 的 correct_answer 和 type 做基本验证，
+    // 选项内容验证依赖 QuestionForm 传递。
+    // 简化方案：用 validateQuiz 验证 title + questions（无 options），
+    // 选项相关验证在 QuestionForm 内部做 inline。
+    const errors = validateQuiz(quiz.title, questions);
+    
+    // 补充选项验证：遍历 questions 检查 correct_answer
+    questions.forEach((q, i) => {
+      if (q.type === 'single_choice' || q.type === 'multiple_choice') {
+        const answer = q.correct_answer;
+        if (q.type === 'single_choice') {
+          if (!answer || (typeof answer === 'string' && !answer.trim())) {
+            errors.questions[i] = { ...(errors.questions[i] || {}), correctAnswer: '请选择正确答案' };
+          }
+        } else {
+          if (!Array.isArray(answer) || answer.length === 0) {
+            errors.questions[i] = { ...(errors.questions[i] || {}), correctAnswer: '请至少选择一个正确答案' };
+          }
+        }
+      }
+    });
+    setQuestionErrors(errors.questions);
+
+    if (quiz.title.trim() && questions.length === 0) {
+      setValidationError('请至少添加一道题目');
       return;
     }
 
-    if (questions.length === 0) {
-      setValidationError('请至少添加一道题目');
+    if (hasValidationErrors(errors)) {
+      const errCount = countQuestionErrors(errors);
+      const msg = errors.title 
+        ? errors.title
+        : `有 ${errCount} 道题目需要完善`;
+      setValidationError(msg);
+      // 滚动到第一个有错误的题目
+      const firstErrIdx = getFirstErrorIndex(errors);
+      if (firstErrIdx >= 0) {
+        const el = document.getElementById(`question-${firstErrIdx}`);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
@@ -103,7 +145,7 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
               type="text"
               value={quiz.title}
               onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${(validationError && !quiz.title.trim()) ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
               placeholder="输入习题标题"
             />
           </div>
@@ -202,12 +244,15 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
               <div className="space-y-4">
                 {questions.map((question, index) => (
                   <SortableItem key={question.id} id={question.id}>
+                    <div id={`question-${index}`}>
                     <QuestionForm
                       question={question}
                       index={index}
+                      errors={questionErrors[index] || null}
                       onUpdate={(updates) => updateQuestion(index, updates)}
                       onDelete={() => deleteQuestion(index)}
                     />
+                    </div>
                   </SortableItem>
                 ))}
               </div>

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import type { Question, QuestionOption } from '../../types';
+import type { QuestionError } from '../../lib/validation';
 
 interface QuestionFormProps {
   question: Question;
   index: number;
+  errors?: QuestionError | null;
   onUpdate: (updates: Partial<Question>) => void;
   onDelete: () => void;
 }
 
-export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFormProps) {
+export function QuestionForm({ question, index, errors = null, onUpdate, onDelete }: QuestionFormProps) {
   const [options, setOptions] = useState<QuestionOption[]>(
     question.type === 'single_choice' || question.type === 'multiple_choice'
       ? (question.question_options || [])
@@ -148,9 +150,12 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
             value={question.content}
             onChange={(e) => handleContentChange(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.content ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
             placeholder="输入题目内容"
           />
+          {errors?.content && (
+            <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+          )}
         </div>
 
         {/* Options for choice questions */}
@@ -170,7 +175,7 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
                     type="text"
                     value={option.content}
                     onChange={(e) => handleOptionChange(optIndex, e.target.value)}
-                    className="flex-1 px-3 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    className={`flex-1 px-3 py-1 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.options || errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
                     placeholder={`选项 ${String.fromCharCode(65 + optIndex)}`}
                   />
                   <button
@@ -183,6 +188,12 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
                 </div>
               ))}
             </div>
+            {errors?.options && (
+              <p className="mt-1 text-sm text-red-600">{errors.options}</p>
+            )}
+            {errors?.correctAnswer && (
+              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+            )}
             <button
               type="button"
               onClick={addOption}
@@ -217,6 +228,9 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
                 <span className="ml-2">错误</span>
               </label>
             </div>
+            {errors?.correctAnswer && (
+              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+            )}
           </div>
         )}
 
@@ -228,9 +242,12 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
               type="text"
               value={question.correct_answer as string}
               onChange={(e) => onUpdate({ correct_answer: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-              placeholder="输入正确答案"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+              placeholder='输入正确答案（多空用 JSON 数组格式如 ["空1","空2"]）'
             />
+            {errors?.correctAnswer && (
+              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+            )}
           </div>
         )}
 
@@ -242,9 +259,12 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
               value={question.correct_answer as string}
               onChange={(e) => onUpdate({ correct_answer: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
               placeholder="输入参考答案"
             />
+            {errors?.correctAnswer && (
+              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+            )}
           </div>
         )}
 
@@ -256,8 +276,11 @@ export function QuestionForm({ question, index, onUpdate, onDelete }: QuestionFo
             value={question.points}
             onChange={(e) => onUpdate({ points: parseInt(e.target.value) || 1 })}
             min="1"
-            className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className={`w-24 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.points ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
           />
+          {errors?.points && (
+            <p className="mt-1 text-sm text-red-600">{errors.points}</p>
+          )}
         </div>
 
         {/* Explanation */}
