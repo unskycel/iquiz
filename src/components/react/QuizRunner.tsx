@@ -177,10 +177,14 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
   /**
    * Get the number of blanks for a fill_blank question.
-   * If correct_answer is a JSON array string like '["空1","空2"]', return its length.
-   * Otherwise return 1 (single blank).
+   * - Array → return length (DB stores multi-blank answers as JS array)
+   * - String starting with '[' → JSON.parse and return length
+   * - Otherwise → 1 (single blank)
    */
   const getBlankCount = (correctAnswer: string | string[]): number => {
+    if (Array.isArray(correctAnswer)) {
+      return correctAnswer.length;
+    }
     if (typeof correctAnswer === 'string' && correctAnswer.trim().startsWith('[')) {
       try {
         const parsed = JSON.parse(correctAnswer);

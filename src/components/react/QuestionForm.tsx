@@ -11,6 +11,108 @@ interface QuestionFormProps {
 }
 
 export function QuestionForm({ question, index, errors = null, onUpdate, onDelete }: QuestionFormProps) {
+
+/**
+ * 独立、纯函数。空数从 correct_answer 推断：数组→length；JSON 字符串→length；否则 1。
+ */
+function getEditorBlankCount(correctAnswer: Question['correct_answer']): number {
+  if (Array.isArray(correctAnswer)) return Math.max(1, correctAnswer.length);
+  if (typeof correctAnswer === 'string' && correctAnswer.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(correctAnswer);
+      if (Array.isArray(parsed)) return Math.max(1, parsed.length);
+    } catch { /* fall through */ }
+  }
+  return 1;
+}
+
+function BlankCountSelector({ count, onChange }: { count: number; onChange: (n: number) => void }) {
+  return (
+    <div className="flex items-center gap-1 text-xs">
+      <span className="text-gray-500">空数</span>
+      {[1, 2, 3, 4, 5, 6].map(n => (
+        <button
+          key={n}
+          type="button"
+          onClick={() => onChange(n)}
+          className={`px-2 py-0.5 rounded border ${
+            count === n
+              ? 'bg-indigo-600 text-white border-indigo-600'
+              : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+          }`}
+        >
+          {n}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function FillBlankEditor({
+  value,
+  onChange,
+  hasError,
+}: {
+  value: Question['correct_answer'];
+  onChange: (v: Question['correct_answer']) => void;
+  hasError: boolean;
+}) {
+  const count = getEditorBlankCount(value);
+
+  // 统一为数组处理
+  const arr: string[] =
+    Array.isArray(value)
+      ? value.map(v => String(v ?? ''))
+      : value && typeof value === 'string' && value.trim().startsWith('[')
+        ? (() => {
+            try {
+              const parsed = JSON.parse(value as string);
+              return Array.isArray(parsed) ? parsed.map((v: unknown) => String(v ?? '')) : [''];
+            } catch {
+              return [''];
+            }
+          })()
+        : [String(value ?? '')];
+
+  // 保证数组长度
+  while (arr.length < count) arr.push('');
+  if (arr.length > count) arr.length = count;
+
+  const setAt = (i: number, v: string) => {
+    const next = [...arr];
+    next[i] = v;
+    onChange(next);
+  };
+
+  if (count === 1) {
+    return (
+      <input
+        type="text"
+        value={arr[0] ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+        placeholder="输入正确答案"
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {arr.map((v, i) => (
+        <div key={i} className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-500 w-12 flex-shrink-0">空 {i + 1}</span>
+          <input
+            type="text"
+            value={v}
+            onChange={(e) => setAt(i, e.target.value)}
+            className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+            placeholder={`输入第 ${i + 1} 个空的答案`}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
   const [options, setOptions] = useState<QuestionOption[]>(
     question.type === 'single_choice' || question.type === 'multiple_choice'
       ? (question.question_options || [])
@@ -237,13 +339,17 @@ export function QuestionForm({ question, index, errors = null, onUpdate, onDelet
         {/* Fill blank answer */}
         {question.type === 'fill_blank' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">正确答案</label>
-            <input
-              type="text"
-              value={question.correct_answer as string}
-              onChange={(e) => onUpdate({ correct_answer: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-              placeholder='输入正确答案（多空用 JSON 数组格式如 ["空1","空2"]）'
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">正确答案</label>
+              <BlankCountSelector
+                count={getEditorBlankCount(question.correct_answer)}
+                onChange={(n) => onUpdate({ correct_answer: n === 1 ? '' : new Array(n).fill('') })}
+              />
+            </div>
+            <FillBlankEditor
+              value={question.correct_answer}
+              onChange={(v) => onUpdate({ correct_answer: v })}
+              hasError={!!errors?.correctAnswer}
             />
             {errors?.correctAnswer && (
               <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
