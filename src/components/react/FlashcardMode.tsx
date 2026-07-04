@@ -84,22 +84,18 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
     switch (q.type) {
       case 'single_choice':
       case 'multiple_choice': {
+        // 选项已在卡片正面展示，这里只显示文字总结
         const correctOpts = q.question_options?.filter((o: any) => o.is_correct) || [];
         if (correctOpts.length === 0) {
-          // 没有带 options 数据，直接展示 correct_answer
           return <span>{Array.isArray(q.correct_answer) ? q.correct_answer.join('、') : q.correct_answer}</span>;
         }
+        const labels = correctOpts.map((o: any, i: number) =>
+          String.fromCharCode(65 + (q.question_options?.indexOf(o) ?? i))
+        );
         return (
-          <ul className="space-y-2">
-            {correctOpts.map((opt: any, i: number) => (
-              <li key={opt.id || i} className="flex items-start gap-2">
-                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-700 text-xs font-bold flex-shrink-0">
-                  ✓
-                </span>
-                <span>{opt.content}</span>
-              </li>
-            ))}
-          </ul>
+          <span className="text-green-700 font-medium">
+            {q.type === 'multiple_choice' ? '多选：' : ''}{labels.join('、')}
+          </span>
         );
       }
       case 'true_false':
@@ -220,6 +216,65 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         <div className="mb-6">
           <p className="text-lg leading-relaxed">{currentQuestion.content}</p>
         </div>
+
+        {/* 选项列表（选择题/判断题） */}
+        {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') &&
+          currentQuestion.question_options &&
+          currentQuestion.question_options.length > 0 && (
+            <div className="space-y-2 mb-6">
+              {currentQuestion.question_options.map((option: any, idx: number) => {
+                const isCorrect = showAnswer && option.is_correct;
+                return (
+                  <div
+                    key={option.id || idx}
+                    className={`flex items-center p-3 rounded-lg border transition-colors ${
+                      isCorrect
+                        ? 'border-green-400 bg-green-50'
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <span className={`w-7 h-7 flex items-center justify-center rounded-full mr-3 flex-shrink-0 text-sm font-semibold ${
+                      isCorrect
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <span>{option.content}</span>
+                    {isCorrect && (
+                      <span className="ml-auto text-green-600">✓</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )
+        }
+
+        {/* 判断题选项 */}
+        {currentQuestion.type === 'true_false' && (
+          <div className="flex space-x-4 mb-6">
+            {['正确', '错误'].map((label) => {
+              const isCorrect =
+                showAnswer &&
+                ((label === '正确' && (currentQuestion.correct_answer === 'true' || currentQuestion.correct_answer === '正确')) ||
+                 (label === '错误' && (currentQuestion.correct_answer === 'false' || currentQuestion.correct_answer === '错误')));
+              return (
+                <div
+                  key={label}
+                  className={`flex-1 p-3 border rounded-lg text-center transition-colors ${
+                    isCorrect
+                      ? 'border-green-400 bg-green-50 text-green-700 font-medium'
+                      : 'border-gray-200 text-gray-600'
+                  }`}
+                >
+                  {label}
+                  {isCorrect && <span className="ml-2">✓</span>}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* 答案区 */}
         <div className="border-t pt-6">
