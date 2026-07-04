@@ -1,1 +1,0 @@
-import{j as e}from"./jsx-runtime.D_zvdyIk.js";import"./index.BCOEHr3l.js";function r(){return e.jsxs("div",{className:"p-4 bg-green-100 rounded-lg",children:[e.jsx("h2",{className:"text-xl font-bold text-green-800",children:"React 组件测试"}),e.jsx("p",{className:"text-green-700",children:"如果你看到这个，说明 React 组件正常工作！"})]})}export{r as TestComponent};
