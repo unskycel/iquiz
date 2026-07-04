@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
-import { gradeAnswer } from '../../../lib/scoring';
+import { supabase } from '../../../../lib/supabase';
+import { gradeAnswer } from '../../../../lib/scoring';
 
 export const PUT: APIRoute = async ({ params, request }) => {
   try {

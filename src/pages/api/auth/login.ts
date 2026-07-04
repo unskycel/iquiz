@@ -1,9 +1,14 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { error } = await supabase.auth.signOut();
+    const { email, password } = await request.json();
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
@@ -12,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    return new Response(JSON.stringify({ message: 'Logged out successfully' }), {
+    return new Response(JSON.stringify({ user: data.user, session: data.session }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

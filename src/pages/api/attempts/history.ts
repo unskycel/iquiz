@@ -1,16 +1,8 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ request }) => {
   try {
-    const { id } = params;
-    if (!id) {
-      return new Response(JSON.stringify({ error: 'Attempt ID required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -29,35 +21,47 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
 
-    // Get attempt
-    const { data: attempt, error: attemptError } = await supabase
-      .from('quiz_attempts')
-      .select('*, quizzes(*)')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single();
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const quizId = url.searchParams.get('quizId');
+    const offset = (page - 1) * limit;
 
-    if (attemptError || !attempt) {
-      return new Response(JSON.stringify({ error: 'Attempt not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    let query = supabase
+      .from('quiz_attempts')
+      .select('*, quizzes(title)')
+      .eq('user_id', user.id)
+      .not('completed_at', 'is', null)
+      .order('completed_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (quizId) {
+      query = query.eq('quiz_id', quizId);
     }
 
-    // Get answers with questions
-    const { data: answers, error: answersError } = await supabase
-      .from('attempt_answers')
-      .select('*, questions(*, question_options(*))')
-      .eq('attempt_id', id);
+    const { data: attempts, error } = await query;
 
-    if (answersError) {
-      return new Response(JSON.stringify({ error: answersError.message }), {
+    if (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ attempt, answers }), {
+    // Get total count
+    let countQuery = supabase
+      .from('quiz_attempts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .not('completed_at', 'is', null);
+
+    if (quizId) {
+      countQuery = countQuery.eq('quiz_id', quizId);
+    }
+
+    const { count } = await countQuery;
+
+    return new Response(JSON.stringify({ attempts, total: count }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

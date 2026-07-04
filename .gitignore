@@ -37,3 +37,7 @@ coverage/
 # Misc
 *.tgz
 .yarn-integrity
+
+# Project memory
+.workbuddy/
+iQuiz-PROJECT.md

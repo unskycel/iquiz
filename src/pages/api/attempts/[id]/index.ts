@@ -1,11 +1,11 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../../lib/supabase';
 
-export const PUT: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params, request }) => {
   try {
     const { id } = params;
     if (!id) {
-      return new Response(JSON.stringify({ error: 'Quiz ID required' }), {
+      return new Response(JSON.stringify({ error: 'Attempt ID required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -29,43 +29,35 @@ export const PUT: APIRoute = async ({ params, request }) => {
       });
     }
 
-    // Check ownership
-    const { data: quiz, error: fetchError } = await supabase
-      .from('quizzes')
-      .select('user_id, is_published')
+    // Get attempt
+    const { data: attempt, error: attemptError } = await supabase
+      .from('quiz_attempts')
+      .select('*, quizzes(*)')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
-    if (fetchError || !quiz) {
-      return new Response(JSON.stringify({ error: 'Quiz not found' }), {
+    if (attemptError || !attempt) {
+      return new Response(JSON.stringify({ error: 'Attempt not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    if (quiz.user_id !== user.id) {
-      return new Response(JSON.stringify({ error: 'Access denied' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // Get answers with questions
+    const { data: answers, error: answersError } = await supabase
+      .from('attempt_answers')
+      .select('*, questions(*, question_options(*))')
+      .eq('attempt_id', id);
 
-    // Toggle published status
-    const { data: updatedQuiz, error } = await supabase
-      .from('quizzes')
-      .update({ is_published: !quiz.is_published })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (answersError) {
+      return new Response(JSON.stringify({ error: answersError.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ quiz: updatedQuiz }), {
+    return new Response(JSON.stringify({ attempt, answers }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

@@ -1,78 +1,11 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
-
-export const GET: APIRoute = async ({ params, request }) => {
-  try {
-    const { id } = params;
-    if (!id) {
-      return new Response(JSON.stringify({ error: 'Quiz ID required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const authHeader = request.headers.get('Authorization');
-    let userId: string | null = null;
-
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-    }
-
-    // Get quiz
-    const { data: quiz, error: quizError } = await supabase
-      .from('quizzes')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (quizError || !quiz) {
-      return new Response(JSON.stringify({ error: 'Quiz not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Check if user can access this quiz
-    if (!quiz.is_published && quiz.user_id !== userId) {
-      return new Response(JSON.stringify({ error: 'Access denied' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Get questions with options
-    const { data: questions, error: questionsError } = await supabase
-      .from('questions')
-      .select('*, question_options(*)')
-      .eq('quiz_id', id)
-      .order('order_index');
-
-    if (questionsError) {
-      return new Response(JSON.stringify({ error: questionsError.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({ quiz, questions }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-};
+import { supabase } from '../../../../../lib/supabase';
 
 export const PUT: APIRoute = async ({ params, request }) => {
   try {
-    const { id } = params;
-    if (!id) {
-      return new Response(JSON.stringify({ error: 'Quiz ID required' }), {
+    const { id, qid } = params;
+    if (!id || !qid) {
+      return new Response(JSON.stringify({ error: 'Quiz ID and Question ID required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -96,7 +29,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
       });
     }
 
-    // Check ownership
+    // Check quiz ownership
     const { data: quiz, error: fetchError } = await supabase
       .from('quizzes')
       .select('user_id')
@@ -119,21 +52,49 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
     const updates = await request.json();
 
-    const { data: updatedQuiz, error } = await supabase
-      .from('quizzes')
+    // Update question
+    const { data: question, error: questionError } = await supabase
+      .from('questions')
       .update(updates)
-      .eq('id', id)
+      .eq('id', qid)
+      .eq('quiz_id', id)
       .select()
       .single();
 
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (questionError) {
+      return new Response(JSON.stringify({ error: questionError.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ quiz: updatedQuiz }), {
+    // Update options if provided
+    if (updates.options) {
+      // Delete existing options
+      await supabase
+        .from('question_options')
+        .delete()
+        .eq('question_id', qid);
+
+      // Insert new options
+      const optionsToInsert = updates.options.map((option: any, index: number) => ({
+        question_id: qid,
+        content: option.content,
+        is_correct: option.is_correct,
+        order_index: index + 1,
+      }));
+
+      await supabase.from('question_options').insert(optionsToInsert);
+    }
+
+    // Fetch question with options
+    const { data: questionWithOptions } = await supabase
+      .from('questions')
+      .select('*, question_options(*)')
+      .eq('id', qid)
+      .single();
+
+    return new Response(JSON.stringify({ question: questionWithOptions }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -147,9 +108,9 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
 export const DELETE: APIRoute = async ({ params, request }) => {
   try {
-    const { id } = params;
-    if (!id) {
-      return new Response(JSON.stringify({ error: 'Quiz ID required' }), {
+    const { id, qid } = params;
+    if (!id || !qid) {
+      return new Response(JSON.stringify({ error: 'Quiz ID and Question ID required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -173,7 +134,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       });
     }
 
-    // Check ownership
+    // Check quiz ownership
     const { data: quiz, error: fetchError } = await supabase
       .from('quizzes')
       .select('user_id')
@@ -194,10 +155,12 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       });
     }
 
+    // Delete question (options will be deleted by cascade)
     const { error } = await supabase
-      .from('quizzes')
+      .from('questions')
       .delete()
-      .eq('id', id);
+      .eq('id', qid)
+      .eq('quiz_id', id);
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
@@ -206,7 +169,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       });
     }
 
-    return new Response(JSON.stringify({ message: 'Quiz deleted' }), {
+    return new Response(JSON.stringify({ message: 'Question deleted' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
