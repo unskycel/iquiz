@@ -1,0 +1,15 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import { FlashcardMode } from '../../../components/react/FlashcardMode';
+
+const { id } = Astro.params;
+---
+
+<MainLayout title="iQuiz - 背题模式">
+  <FlashcardMode client:load
+    quizId={id}
+    onCancel={() => {
+      window.location.href = '/dashboard';
+    }}
+  />
+</MainLayout>

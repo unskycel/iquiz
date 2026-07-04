@@ -191,6 +191,12 @@ export function Dashboard({ userId }: DashboardProps) {
                     编辑
                   </a>
                   <a
+                    href={`/quiz/${quiz.id}/flashcard`}
+                    className="flex-1 text-center py-2 border border-teal-400 text-teal-600 rounded-lg hover:bg-teal-50 text-sm"
+                  >
+                    背题
+                  </a>
+                  <a
                     href={`/quiz/${quiz.id}/take`}
                     className="flex-1 text-center py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
                   >
