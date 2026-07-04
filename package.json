@@ -7,7 +7,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "node dist/server/entry.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/node": "^8.3.4",
@@ -33,7 +35,9 @@
     "@astrojs/tailwind": "^6.0.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "jsdom": "^25.0.1",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.9"
   }
 }
