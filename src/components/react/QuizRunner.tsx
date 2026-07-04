@@ -31,6 +31,15 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     }
   }, [quizId]);
 
+  // Timer — must be before any early returns (React hooks rule)
+  useEffect(() => {
+    if (loading || error || !quiz || questions.length === 0) return;
+    const timer = setInterval(() => {
+      setTimeElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [loading, error, quiz, questions.length]);
+
   const loadQuiz = async () => {
     try {
       const token = getAccessToken();
@@ -93,14 +102,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex + 1) / questions.length) * 100;
-
-  // Timer
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeElapsed((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const handleAnswerChange = (answer: string | string[]) => {
     setAnswers((prev) => new Map(prev).set(currentQuestion.id, answer));
