@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { QuizAttempt, Question, AttemptAnswer } from '../../types';
+import { getAccessToken } from '../../lib/auth-client';
 
 interface AttemptResultsProps {
   attemptId: string;
@@ -21,7 +22,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
 
   const loadAttempt = async () => {
     try {
-      const token = localStorage.getItem('supabase.auth.token');
+      const token = getAccessToken();
       if (!token) {
         throw new Error('未登录');
       }
@@ -57,7 +58,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
 
   const handleExportPDF = async () => {
     try {
-      const token = localStorage.getItem('supabase.auth.token');
+      const token = getAccessToken();
       if (!token) return;
 
       const response = await fetch(`/api/export/attempts/${attemptId}.pdf`, {

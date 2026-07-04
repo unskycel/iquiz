@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { QuizAttempt } from '../../types';
+import { getAccessToken } from '../../lib/auth-client';
 
 interface QuizHistoryProps {
   userId: string;
@@ -18,7 +19,7 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
 
   const loadAttempts = async () => {
     try {
-      const token = localStorage.getItem('supabase.auth.token');
+      const token = getAccessToken();
       if (!token) return;
 
       const response = await fetch(`/api/attempts/history?page=${page}&limit=${limit}`, {

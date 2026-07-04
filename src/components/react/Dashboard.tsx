@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Quiz, QuizAttempt } from '../../types';
+import { getAccessToken } from '../../lib/auth-client';
 
 interface DashboardProps {
   userId: string;
@@ -22,11 +23,11 @@ export function Dashboard({ userId }: DashboardProps) {
 
   const loadData = async () => {
     try {
-      const token = localStorage.getItem('supabase.auth.token');
-      if (!token) return;
+      const accessToken = getAccessToken();
+      if (!accessToken) return;
 
       const headers = {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${accessToken}`,
       };
 
       // Load quizzes

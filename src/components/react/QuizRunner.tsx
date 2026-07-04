@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Question, QuizAttempt } from '../../types';
+import { getAccessToken, authHeaders } from '../../lib/auth-client';
 
 interface QuizRunnerProps {
   quizId?: string;
@@ -32,7 +33,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
   const loadQuiz = async () => {
     try {
-      const token = localStorage.getItem('supabase.auth.token');
+      const token = getAccessToken();
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -127,7 +128,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+          ...authHeaders(),
         },
         body: JSON.stringify({ quizId: quiz.id }),
       });
@@ -141,7 +142,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
+            ...authHeaders(),
           },
           body: JSON.stringify({ questionId, userAnswer: answer }),
         });
@@ -150,9 +151,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       // Complete the attempt
       const completeResponse = await fetch(`/api/attempts/${attempt.id}/complete`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
-        },
+        headers: authHeaders(),
       });
 
       if (!completeResponse.ok) throw new Error('Failed to complete attempt');

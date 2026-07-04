@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import type { ReferenceMaterial } from '../../types';
+import { authHeaders } from '../../lib/auth-client';
 
 interface FileUploaderProps {
   quizId: string;
@@ -43,9 +44,7 @@ export function FileUploader({ quizId, onUploadComplete, onDelete }: FileUploade
 
       const response = await fetch('/api/files/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`,
-        },
+        headers: authHeaders(),
         body: formData,
       });
 
