@@ -25,32 +25,23 @@ export function Dashboard({ userId }: DashboardProps) {
     try {
       const accessToken = getAccessToken();
       if (!accessToken) {
-        console.warn('[Dashboard] No access token found in localStorage');
-        // 列出 localStorage 中所有 supabase 相关 key
-        if (typeof window !== 'undefined') {
-          const keys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('sb-'));
-          console.warn('[Dashboard] Found keys:', keys);
-        }
         setLoading(false);
         return;
       }
-
-      console.log('[Dashboard] Token found, length:', accessToken.length);
 
       const headers = {
         'Authorization': `Bearer ${accessToken}`,
       };
 
       // Load quizzes
+      let quizData: Quiz[] = [];
       const quizzesResponse = await fetch('/api/quizzes?limit=100', { headers });
-      console.log('[Dashboard] /api/quizzes status:', quizzesResponse.status);
-      if (!quizzesResponse.ok) {
-        const errBody = await quizzesResponse.text();
-        console.error('[Dashboard] API error:', errBody);
-      }
       if (quizzesResponse.ok) {
-        const { quizzes: quizData } = await quizzesResponse.json();
-        setQuizzes(quizData || []);
+        const data = await quizzesResponse.json();
+        quizData = data.quizzes || [];
+        setQuizzes(quizData);
+      } else {
+        console.error('[Dashboard] /api/quizzes error:', quizzesResponse.status);
       }
 
       // Load attempts
