@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { Question, QuestionType, QuestionOption } from '../../types';
 import { validateQuiz, hasValidationErrors, countQuestionErrors, getFirstErrorIndex, type QuestionError } from '../../lib/validation';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -7,6 +7,7 @@ import { SortableItem } from './SortableItem';
 import { QuestionForm } from './QuestionForm';
 
 interface QuizEditorProps {
+  quizId?: string;
   initialQuiz?: {
     id?: string;
     title: string;
@@ -14,17 +15,40 @@ interface QuizEditorProps {
     tags: string[];
   };
   initialQuestions?: Question[];
-  onSave: (quiz: any, questions: any[]) => Promise<void>;
+  onSave?: (quiz: any, questions: any[]) => Promise<void>;
   onCancel: () => void;
 }
 
-export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCancel }: QuizEditorProps) {
+export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave, onCancel }: QuizEditorProps) {
   const [quiz, setQuiz] = useState(initialQuiz || { title: '', description: '', tags: [] });
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [loading, setLoading] = useState(!!quizId && !initialQuiz);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [questionErrors, setQuestionErrors] = useState<(QuestionError | null)[]>([]);
+
+  // 如果传了 quizId 但没传 initialQuiz，从 API 加载
+  useEffect(() => {
+    if (!quizId || initialQuiz) return;
+    (async () => {
+      try {
+        const token = (await import('../../lib/auth-client')).getAccessToken();
+        const headers: HeadersInit = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`/api/quizzes/${quizId}`, { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.quiz) setQuiz(data.quiz);
+        if (data.questions) setQuestions(data.questions);
+      } catch (e) {
+        setLoadError(e instanceof Error ? e.message : '加载失败');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [quizId, initialQuiz]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -124,7 +148,25 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
 
     setIsSaving(true);
     try {
-      await onSave(quiz, questions);
+      if (onSave) {
+        await onSave(quiz, questions);
+      } else {
+        const token = (await import('../../lib/auth-client')).getAccessToken();
+        const headers: HeadersInit = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';
+        const method = quizId ? 'PUT' : 'POST';
+        const res = await fetch(url, { method, headers, body: JSON.stringify({ quiz, questions }) });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        if (data.quiz?.id && !quizId) {
+          // 跳到编辑页继续操作
+          window.location.href = `/quiz/${data.quiz.id}`;
+        }
+      }
     } catch (error) {
       console.error('Save error:', error);
       setSaveError('保存失败，请重试');
@@ -134,7 +176,19 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
   };
 
   return (
-    <div className="space-y-6">
+    <div>
+      {loading && (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">加载中…</p>
+        </div>
+      )}
+      {loadError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          加载失败：{loadError}
+        </div>
+      )}
+      <div className="space-y-6">
       {/* Quiz Info */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">基本信息</h2>
@@ -293,6 +347,7 @@ export function QuizEditor({ initialQuiz, initialQuestions = [], onSave, onCance
         </button>
       </div>
       </div>
+    </div>
     </div>
   );
 }

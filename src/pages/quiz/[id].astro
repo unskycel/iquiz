@@ -1,0 +1,24 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { QuizEditor } from '../../components/react/QuizEditor';
+
+const { id } = Astro.params;
+---
+
+<MainLayout title="iQuiz - 编辑习题">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">编辑习题</h1>
+    <p class="mt-2 text-gray-600">修改习题信息和题目</p>
+  </div>
+
+  <QuizEditor client:load
+    quizId={id}
+    onSave={async (quiz, questions) => {
+      // Save handled inside the React component via Supabase
+      console.log('Saving quiz:', quiz, questions);
+    }}
+    onCancel={() => {
+      window.location.href = '/dashboard';
+    }}
+  />
+</MainLayout>
