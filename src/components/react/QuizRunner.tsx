@@ -180,21 +180,28 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       case 'single_choice':
         return (
           <div className="space-y-3">
-            {currentQuestion.question_options?.map((option) => (
+            {currentQuestion.question_options?.map((option, idx) => (
               <label
                 key={option.id}
-                className={`block p-4 border rounded-lg cursor-pointer transition-colors ${
+                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                   currentAnswer === option.content
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
+                <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-4 flex-shrink-0 font-semibold text-sm ${
+                  currentAnswer === option.content
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {String.fromCharCode(65 + idx)}
+                </span>
                 <input
                   type="radio"
                   name={`question-${currentQuestion.id}`}
                   checked={currentAnswer === option.content}
                   onChange={() => handleAnswerChange(option.content)}
-                  className="text-indigo-600 mr-3"
+                  className="sr-only"
                 />
                 {option.content}
               </label>
@@ -206,15 +213,22 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         const selectedOptions = (currentAnswer as string[]) || [];
         return (
           <div className="space-y-3">
-            {currentQuestion.question_options?.map((option) => (
+            {currentQuestion.question_options?.map((option, idx) => (
               <label
                 key={option.id}
-                className={`block p-4 border rounded-lg cursor-pointer transition-colors ${
+                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedOptions.includes(option.content)
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
+                <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-4 flex-shrink-0 font-semibold text-sm ${
+                  selectedOptions.includes(option.content)
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {String.fromCharCode(65 + idx)}
+                </span>
                 <input
                   type="checkbox"
                   checked={selectedOptions.includes(option.content)}
@@ -224,7 +238,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                       : [...selectedOptions, option.content];
                     handleAnswerChange(newSelected);
                   }}
-                  className="text-indigo-600 mr-3"
+                  className="sr-only"
                 />
                 {option.content}
               </label>
