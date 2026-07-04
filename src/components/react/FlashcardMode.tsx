@@ -14,6 +14,7 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set()); // 用户点击的选项 id
 
   useEffect(() => {
     (async () => {
@@ -34,9 +35,10 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
     })();
   }, [quizId]);
 
-  // 切题时重置翻面状态
+  // 切题时重置状态
   useEffect(() => {
     setShowAnswer(false);
+    setSelectedOptions(new Set());
   }, [currentIndex]);
 
   if (loading) {
@@ -217,34 +219,56 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
           <p className="text-lg leading-relaxed">{currentQuestion.content}</p>
         </div>
 
-        {/* 选项列表（选择题/判断题） */}
+        {/* 选项列表（选择题） */}
         {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') &&
           currentQuestion.question_options &&
           currentQuestion.question_options.length > 0 && (
             <div className="space-y-2 mb-6">
               {currentQuestion.question_options.map((option: any, idx: number) => {
-                const isCorrect = showAnswer && option.is_correct;
+                const isSelected = selectedOptions.has(option.id);
+                const isCorrect = option.is_correct;
+                const reveal = selectedOptions.size > 0;
+                const showGreen = reveal && isCorrect;
+                const showRed = reveal && isSelected && !isCorrect;
                 return (
-                  <div
+                  <button
                     key={option.id || idx}
-                    className={`flex items-center p-3 rounded-lg border transition-colors ${
-                      isCorrect
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedOptions((prev) => {
+                        const next = new Set(prev);
+                        if (currentQuestion.type === 'multiple_choice') {
+                          if (next.has(option.id)) next.delete(option.id);
+                          else next.add(option.id);
+                        } else {
+                          next.clear();
+                          next.add(option.id);
+                        }
+                        return next;
+                      });
+                    }}
+                    className={`w-full flex items-center p-3 rounded-lg border transition-colors text-left ${
+                      showGreen
                         ? 'border-green-400 bg-green-50'
-                        : 'border-gray-200'
+                        : showRed
+                        ? 'border-red-400 bg-red-50'
+                        : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <span className={`w-7 h-7 flex items-center justify-center rounded-full mr-3 flex-shrink-0 text-sm font-semibold ${
-                      isCorrect
+                      showGreen
                         ? 'bg-green-500 text-white'
+                        : showRed
+                        ? 'bg-red-500 text-white'
                         : 'bg-gray-100 text-gray-500'
                     }`}>
                       {String.fromCharCode(65 + idx)}
                     </span>
                     <span>{option.content}</span>
-                    {isCorrect && (
-                      <span className="ml-auto text-green-600">✓</span>
-                    )}
-                  </div>
+                    {showGreen && <span className="ml-auto text-green-600">✓</span>}
+                    {showRed && <span className="ml-auto text-red-600">✗</span>}
+                  </button>
                 );
               })}
             </div>
@@ -252,29 +276,48 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         }
 
         {/* 判断题选项 */}
-        {currentQuestion.type === 'true_false' && (
-          <div className="flex space-x-4 mb-6">
-            {['正确', '错误'].map((label) => {
-              const isCorrect =
-                showAnswer &&
-                ((label === '正确' && (currentQuestion.correct_answer === 'true' || currentQuestion.correct_answer === '正确')) ||
-                 (label === '错误' && (currentQuestion.correct_answer === 'false' || currentQuestion.correct_answer === '错误')));
-              return (
-                <div
-                  key={label}
-                  className={`flex-1 p-3 border rounded-lg text-center transition-colors ${
-                    isCorrect
-                      ? 'border-green-400 bg-green-50 text-green-700 font-medium'
-                      : 'border-gray-200 text-gray-600'
-                  }`}
-                >
-                  {label}
-                  {isCorrect && <span className="ml-2">✓</span>}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {currentQuestion.type === 'true_false' && (() => {
+          const tfOptions = [
+            { label: '正确', value: 'true', isCorrect: currentQuestion.correct_answer === 'true' || currentQuestion.correct_answer === '正确' },
+            { label: '错误', value: 'false', isCorrect: currentQuestion.correct_answer === 'false' || currentQuestion.correct_answer === '错误' },
+          ];
+          return (
+            <div className="flex space-x-4 mb-6">
+              {tfOptions.map((opt) => {
+                const isSelected = selectedOptions.has(opt.value);
+                const reveal = selectedOptions.size > 0;
+                const showGreen = reveal && opt.isCorrect;
+                const showRed = reveal && isSelected && !opt.isCorrect;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedOptions((prev) => {
+                        const next = new Set(prev);
+                        next.clear();
+                        next.add(opt.value);
+                        return next;
+                      });
+                    }}
+                    className={`flex-1 p-3 border rounded-lg text-center transition-colors ${
+                      showGreen
+                        ? 'border-green-400 bg-green-50 text-green-700 font-medium'
+                        : showRed
+                        ? 'border-red-400 bg-red-50 text-red-700 font-medium'
+                        : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {opt.label}
+                    {showGreen && <span className="ml-2">✓</span>}
+                    {showRed && <span className="ml-2">✗</span>}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* 答案区 */}
         <div className="border-t pt-6">
