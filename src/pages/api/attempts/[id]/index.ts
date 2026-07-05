@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { supabaseAdmin } from '../../../../lib/supabase-server';
 import { supabase } from '../../../../lib/supabase';
 
 export const GET: APIRoute = async ({ params, request }) => {
@@ -30,7 +31,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     }
 
     // Get attempt
-    const { data: attempt, error: attemptError } = await supabase
+    const { data: attempt, error: attemptError } = await supabaseAdmin
       .from('quiz_attempts')
       .select('*, quizzes(*)')
       .eq('id', id)
@@ -38,14 +39,14 @@ export const GET: APIRoute = async ({ params, request }) => {
       .single();
 
     if (attemptError || !attempt) {
-      return new Response(JSON.stringify({ error: 'Attempt not found' }), {
+      return new Response(JSON.stringify({ error: attemptError?.message || 'Attempt not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
     // Get answers with questions
-    const { data: answers, error: answersError } = await supabase
+    const { data: answers, error: answersError } = await supabaseAdmin
       .from('attempt_answers')
       .select('*, questions(*, question_options(*))')
       .eq('attempt_id', id);
