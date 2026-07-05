@@ -252,22 +252,15 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
           if (mouseStartX.current === null) return;
           const dx = e.clientX - mouseStartX.current;
           mouseStartX.current = null;
-          // 拖拽超过 80px 才是滑动，否则视为点击
+          // 拖拽超过 80px 才是滑动；点击由 onClick 处理
           if (Math.abs(dx) > 80) {
             if (dx > 0 && currentIndex > 0) setCurrentIndex(currentIndex - 1);
             else if (dx < 0 && currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1);
-          } else {
-            // 桌面点击 — 触发选择题型翻面
-            if (currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice' || currentQuestion.type === 'true_false') {
-              setShowAnswer((s) => !s);
-            }
           }
         }}
         onClick={() => {
-          // 触摸端点击 — 选择题型翻面
-          if (currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice' || currentQuestion.type === 'true_false') {
-            setShowAnswer((s) => !s);
-          }
+          // 点击卡片 — 翻面查看答案
+          setShowAnswer((s) => !s);
         }}
       >
         {/* 题型 + 分值 */}
