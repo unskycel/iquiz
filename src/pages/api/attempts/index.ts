@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { supabaseAdmin } from '../../../lib/supabase-server';
 import { supabase } from '../../../lib/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -24,7 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { quizId } = await request.json();
 
     // Get quiz and calculate total points
-    const { data: questions, error: questionsError } = await supabase
+    const { data: questions, error: questionsError } = await supabaseAdmin
       .from('questions')
       .select('points')
       .eq('quiz_id', quizId);
@@ -39,7 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
     const totalPoints = questions?.reduce((sum, q) => sum + q.points, 0) || 0;
 
     // Create attempt
-    const { data: attempt, error: attemptError } = await supabase
+    const { data: attempt, error: attemptError } = await supabaseAdmin
       .from('quiz_attempts')
       .insert({
         user_id: user.id,

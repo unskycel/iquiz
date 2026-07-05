@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { supabaseAdmin } from '../../../../lib/supabase-server';
 import { supabase } from '../../../../lib/supabase';
 import { gradeAnswer } from '../../../../lib/scoring';
 
@@ -31,7 +32,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     }
 
     // Verify attempt ownership
-    const { data: attempt, error: attemptError } = await supabase
+    const { data: attempt, error: attemptError } = await supabaseAdmin
       .from('quiz_attempts')
       .select('user_id')
       .eq('id', id)
@@ -54,7 +55,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     const { questionId, userAnswer } = await request.json();
 
     // Get question
-    const { data: question, error: questionError } = await supabase
+    const { data: question, error: questionError } = await supabaseAdmin
       .from('questions')
       .select('*, question_options(*)')
       .eq('id', questionId)
@@ -71,7 +72,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     const { isCorrect, pointsAwarded } = gradeAnswer(question, userAnswer, question.question_options);
 
     // Save or update answer
-    const { data: existingAnswer } = await supabase
+    const { data: existingAnswer } = await supabaseAdmin
       .from('attempt_answers')
       .select('id')
       .eq('attempt_id', id)
@@ -81,7 +82,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     let answer;
     if (existingAnswer) {
       // Update existing answer
-      const { data: updatedAnswer, error: updateError } = await supabase
+      const { data: updatedAnswer, error: updateError } = await supabaseAdmin
         .from('attempt_answers')
         .update({
           user_answer: userAnswer,
@@ -101,7 +102,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
       answer = updatedAnswer;
     } else {
       // Create new answer
-      const { data: newAnswer, error: createError } = await supabase
+      const { data: newAnswer, error: createError } = await supabaseAdmin
         .from('attempt_answers')
         .insert({
           attempt_id: id,
