@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../lib/supabase-server';
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
@@ -20,8 +21,8 @@ export const GET: APIRoute = async ({ params, request }) => {
       userId = user?.id || null;
     }
 
-    // Get quiz
-    const { data: quiz, error: quizError } = await supabase
+    // Get quiz (use supabaseAdmin to bypass RLS)
+    const { data: quiz, error: quizError } = await supabaseAdmin
       .from('quizzes')
       .select('*')
       .eq('id', id)
@@ -43,7 +44,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     }
 
     // Get questions with options
-    const { data: questions, error: questionsError } = await supabase
+    const { data: questions, error: questionsError } = await supabaseAdmin
       .from('questions')
       .select('*, question_options(*)')
       .eq('quiz_id', id)
@@ -96,8 +97,8 @@ export const PUT: APIRoute = async ({ params, request }) => {
       });
     }
 
-    // Check ownership
-    const { data: quiz, error: fetchError } = await supabase
+    // Check ownership (use supabaseAdmin to bypass RLS)
+    const { data: quiz, error: fetchError } = await supabaseAdmin
       .from('quizzes')
       .select('user_id')
       .eq('id', id)
@@ -129,7 +130,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     if ('tags' in quizUpdate) updates.tags = quizUpdate.tags || [];
     if ('is_published' in quizUpdate) updates.is_published = !!quizUpdate.is_published;
 
-    const { data: updatedQuiz, error } = await supabase
+    const { data: updatedQuiz, error } = await supabaseAdmin
       .from('quizzes')
       .update(updates)
       .eq('id', id)
@@ -148,7 +149,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     let storedQuestions: any[] = [];
     if (questionsInput !== null) {
       // Delete existing questions (cascade deletes options via FK)
-      const { error: delErr } = await supabase
+      const { error: delErr } = await supabaseAdmin
         .from('questions')
         .delete()
         .eq('quiz_id', id);
@@ -163,7 +164,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
       // Re-insert
       for (let i = 0; i < questionsInput.length; i++) {
         const q = questionsInput[i];
-        const { data: inserted, error: qErr } = await supabase
+        const { data: inserted, error: qErr } = await supabaseAdmin
           .from('questions')
           .insert({
             quiz_id: id,
@@ -190,7 +191,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
             is_correct: !!opt.is_correct,
             order_index: oi + 1,
           }));
-          const { error: optErr } = await supabase.from('question_options').insert(optionRows);
+          const { error: optErr } = await supabaseAdmin.from('question_options').insert(optionRows);
           if (optErr) {
             console.error('[PUT /api/quizzes/:id] insert options error:', optErr);
           }
@@ -240,8 +241,8 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       });
     }
 
-    // Check ownership
-    const { data: quiz, error: fetchError } = await supabase
+    // Check ownership (use supabaseAdmin to bypass RLS)
+    const { data: quiz, error: fetchError } = await supabaseAdmin
       .from('quizzes')
       .select('user_id')
       .eq('id', id)
@@ -261,7 +262,7 @@ export const DELETE: APIRoute = async ({ params, request }) => {
       });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('quizzes')
       .delete()
       .eq('id', id);

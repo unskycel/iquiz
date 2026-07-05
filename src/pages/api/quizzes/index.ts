@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase-server';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
@@ -26,7 +27,7 @@ export const GET: APIRoute = async ({ request }) => {
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
 
-    const { data: quizzes, error } = await supabase
+    const { data: quizzes, error } = await supabaseAdmin
       .from('quizzes')
       .select('*')
       .eq('user_id', user.id)
@@ -41,7 +42,7 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     // Get total count
-    const { count } = await supabase
+    const { count } = await supabaseAdmin
       .from('quizzes')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
@@ -91,7 +92,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const { data: quiz, error } = await supabase
+    const { data: quiz, error } = await supabaseAdmin
       .from('quizzes')
       .insert({
         user_id: user.id,
@@ -114,7 +115,7 @@ export const POST: APIRoute = async ({ request }) => {
     const storedQuestions: any[] = [];
     for (let i = 0; i < questionsInput.length; i++) {
       const q = questionsInput[i];
-      const { data: inserted, error: qErr } = await supabase
+      const { data: inserted, error: qErr } = await supabaseAdmin
         .from('questions')
         .insert({
           quiz_id: quiz.id,
@@ -142,7 +143,7 @@ export const POST: APIRoute = async ({ request }) => {
           is_correct: !!opt.is_correct,
           order_index: oi + 1,
         }));
-        const { error: optErr } = await supabase.from('question_options').insert(optionRows);
+        const { error: optErr } = await supabaseAdmin.from('question_options').insert(optionRows);
         if (optErr) {
           console.error('[POST /api/quizzes] insert options error:', optErr);
         }
