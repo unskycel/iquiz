@@ -135,13 +135,15 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         },
         body: JSON.stringify({ quizId: quiz.id }),
       });
-
-      if (!response.ok) throw new Error('Failed to create attempt');
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`创建答题记录失败 (${response.status}): ${errBody}`);
+      }
       const { attempt } = await response.json();
 
       // Submit all answers
       for (const [questionId, answer] of answers.entries()) {
-        await fetch(`/api/attempts/${attempt.id}/answer`, {
+        const r = await fetch(`/api/attempts/${attempt.id}/answer`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -149,6 +151,10 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
           },
           body: JSON.stringify({ questionId, userAnswer: answer }),
         });
+        if (!r.ok) {
+          const errBody = await r.text();
+          throw new Error(`提交答案失败 题目${questionId} (${r.status}): ${errBody}`);
+        }
       }
 
       // Complete the attempt
@@ -156,14 +162,16 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         method: 'POST',
         headers: authHeaders(),
       });
-
-      if (!completeResponse.ok) throw new Error('Failed to complete attempt');
+      if (!completeResponse.ok) {
+        const errBody = await completeResponse.text();
+        throw new Error(`完成答题失败 (${completeResponse.status}): ${errBody}`);
+      }
       const { attempt: completedAttempt } = await completeResponse.json();
 
       onComplete(completedAttempt, answers);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit error:', error);
-      setSubmitError('提交失败，请检查网络后重试');
+      setSubmitError(`提交失败: ${error?.message || '请检查网络后重试'}`);
     } finally {
       setIsSubmitting(false);
     }
