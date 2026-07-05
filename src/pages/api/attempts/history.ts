@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase-server';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
@@ -27,7 +28,7 @@ export const GET: APIRoute = async ({ request }) => {
     const quizId = url.searchParams.get('quizId');
     const offset = (page - 1) * limit;
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('quiz_attempts')
       .select('*, quizzes(title)')
       .eq('user_id', user.id)
@@ -49,7 +50,7 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     // Get total count
-    let countQuery = supabase
+    let countQuery = supabaseAdmin
       .from('quiz_attempts')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
