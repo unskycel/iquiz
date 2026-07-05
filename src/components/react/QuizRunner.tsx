@@ -78,7 +78,10 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       <div className="text-center py-8">
         <p className="text-red-600">{error || '习题不存在'}</p>
         <button
-          onClick={onCancel}
+          onClick={() => {
+            if (typeof onCancel === 'function') onCancel();
+            else window.location.href = '/dashboard';
+          }}
           className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
           返回
@@ -92,7 +95,10 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       <div className="text-center py-8">
         <p className="text-gray-600">该习题还没有题目</p>
         <button
-          onClick={onCancel}
+          onClick={() => {
+            if (typeof onCancel === 'function') onCancel();
+            else window.location.href = '/dashboard';
+          }}
           className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
         >
           返回
@@ -172,7 +178,13 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       }
       const { attempt: completedAttempt } = await completeResponse.json();
 
-      onComplete(completedAttempt, answers);
+      if (typeof onComplete === 'function') {
+        onComplete(completedAttempt, answers);
+      } else {
+        // Astro client:load does not serialize function props.
+        // Fall back to direct navigation using the returned attempt id.
+        window.location.href = `/quiz/attempts/${completedAttempt.id}`;
+      }
     } catch (error: any) {
       console.error('Submit error:', error);
       setSubmitError(`提交失败: ${error?.message || '请检查网络后重试'}`);
