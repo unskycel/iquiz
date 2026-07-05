@@ -160,7 +160,11 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       // Complete the attempt
       const completeResponse = await fetch(`/api/attempts/${attempt.id}/complete`, {
         method: 'POST',
-        headers: authHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: '{}',
       });
       if (!completeResponse.ok) {
         const errBody = await completeResponse.text();
