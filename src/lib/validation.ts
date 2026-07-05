@@ -38,36 +38,51 @@ export function validateQuestion(
   // 按题型验证
   switch (question.type) {
     case 'single_choice': {
-      const validOptions = (options || []).filter(o => o.content.trim());
-      if (validOptions.length < 2) {
-        errors.options = '至少需要 2 个非空选项';
-      }
-      const hasCorrect = (options || []).some(o => o.is_correct);
-      if (!hasCorrect) {
-        errors.correctAnswer = '请选择正确答案';
-      }
-      // 检查正确答案对应的选项是否有内容
-      const correctOption = (options || []).find(o => o.is_correct);
-      if (correctOption && !correctOption.content.trim()) {
-        errors.correctAnswer = '正确选项的内容不能为空';
+      if (options) {
+        // 详细选项验证（由 QuestionForm 内部调用时传入）
+        const validOptions = options.filter(o => o.content.trim());
+        if (validOptions.length < 2) {
+          errors.options = '至少需要 2 个非空选项';
+        }
+        const hasCorrect = options.some(o => o.is_correct);
+        if (!hasCorrect) {
+          errors.correctAnswer = '请选择正确答案';
+        }
+        const correctOption = options.find(o => o.is_correct);
+        if (correctOption && !correctOption.content.trim()) {
+          errors.correctAnswer = '正确选项的内容不能为空';
+        }
+      } else {
+        // 浅验证（由 validateQuiz 顶层调用时）— 仅检查是否选了正确答案
+        const answer = question.correct_answer;
+        const answerStr = Array.isArray(answer) ? String(answer[0] ?? '') : (answer == null ? '' : String(answer));
+        if (!answerStr.trim()) {
+          errors.correctAnswer = '请选择正确答案';
+        }
       }
       break;
     }
 
     case 'multiple_choice': {
-      const validOptions = (options || []).filter(o => o.content.trim());
-      if (validOptions.length < 2) {
-        errors.options = '至少需要 2 个非空选项';
-      }
-      const correctCount = (options || []).filter(o => o.is_correct).length;
-      if (correctCount === 0) {
-        errors.correctAnswer = '请至少选择一个正确答案';
-      }
-      // 检查正确答案对应的选项是否有内容
-      const correctOptions = (options || []).filter(o => o.is_correct);
-      const emptyCorrect = correctOptions.find(o => !o.content.trim());
-      if (emptyCorrect) {
-        errors.correctAnswer = '正确选项的内容不能为空';
+      if (options) {
+        const validOptions = options.filter(o => o.content.trim());
+        if (validOptions.length < 2) {
+          errors.options = '至少需要 2 个非空选项';
+        }
+        const correctCount = options.filter(o => o.is_correct).length;
+        if (correctCount === 0) {
+          errors.correctAnswer = '请至少选择一个正确答案';
+        }
+        const correctOptions = options.filter(o => o.is_correct);
+        const emptyCorrect = correctOptions.find(o => !o.content.trim());
+        if (emptyCorrect) {
+          errors.correctAnswer = '正确选项的内容不能为空';
+        }
+      } else {
+        const answer = question.correct_answer;
+        if (!Array.isArray(answer) || answer.length === 0) {
+          errors.correctAnswer = '请至少选择一个正确答案';
+        }
       }
       break;
     }
