@@ -50,7 +50,8 @@ export const POST: APIRoute = async ({ request }) => {
       .single();
 
     if (attemptError) {
-      return new Response(JSON.stringify({ error: attemptError.message }), {
+      console.error('[POST /api/attempts] insert failed:', attemptError);
+      return new Response(JSON.stringify({ error: attemptError.message, code: attemptError.code, details: attemptError.details, hint: attemptError.hint }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -61,7 +62,8 @@ export const POST: APIRoute = async ({ request }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error('[POST /api/attempts] uncaught error:', error);
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
