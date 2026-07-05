@@ -208,6 +208,26 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         </div>
       </div>
 
+      {/* Question Navigator (above card, single-row horizontal scroll) */}
+      <div className="mb-4 bg-white rounded-lg shadow-sm p-3">
+        <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-thin">
+          {questions.map((q, index) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setCurrentIndex(index)}
+              className={`shrink-0 w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                index === currentIndex
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Flashcard */}
       <div
         className="bg-white rounded-lg shadow-sm p-8 mb-6 min-h-[300px] select-none touch-pan-y"
@@ -426,26 +446,6 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         </div>
       </div>
 
-      {/* Question Navigator */}
-      <div className="mt-6 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">题目导航</h3>
-        <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
-          {questions.map((q, index) => (
-            <button
-              key={q.id}
-              type="button"
-              onClick={() => setCurrentIndex(index)}
-              className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                index === currentIndex
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
