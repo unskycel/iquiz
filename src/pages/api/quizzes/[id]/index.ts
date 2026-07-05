@@ -117,7 +117,17 @@ export const PUT: APIRoute = async ({ params, request }) => {
       });
     }
 
-    const updates = await request.json();
+    const body = await request.json();
+    // Accept either { ...quizFields } (legacy) or { quiz, questions } (QuizEditor)
+    const quizUpdate: any = body.quiz || body;
+    const questionsInput: any[] | null = Array.isArray(body.questions) ? body.questions : null;
+
+    // Only update scalar quiz columns; ignore nested fields
+    const updates: any = {};
+    if ('title' in quizUpdate) updates.title = quizUpdate.title;
+    if ('description' in quizUpdate) updates.description = quizUpdate.description ?? null;
+    if ('tags' in quizUpdate) updates.tags = quizUpdate.tags || [];
+    if ('is_published' in quizUpdate) updates.is_published = !!quizUpdate.is_published;
 
     const { data: updatedQuiz, error } = await supabase
       .from('quizzes')
@@ -127,13 +137,70 @@ export const PUT: APIRoute = async ({ params, request }) => {
       .single();
 
     if (error) {
+      console.error('[PUT /api/quizzes/:id] update quiz error:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ quiz: updatedQuiz }), {
+    // Replace questions if provided (delete all + recreate)
+    let storedQuestions: any[] = [];
+    if (questionsInput !== null) {
+      // Delete existing questions (cascade deletes options via FK)
+      const { error: delErr } = await supabase
+        .from('questions')
+        .delete()
+        .eq('quiz_id', id);
+      if (delErr) {
+        console.error('[PUT /api/quizzes/:id] delete questions error:', delErr);
+        return new Response(JSON.stringify({ error: delErr.message }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Re-insert
+      for (let i = 0; i < questionsInput.length; i++) {
+        const q = questionsInput[i];
+        const { data: inserted, error: qErr } = await supabase
+          .from('questions')
+          .insert({
+            quiz_id: id,
+            type: q.type,
+            content: q.content,
+            order_index: i + 1,
+            correct_answer: q.correct_answer,
+            points: q.points ?? 1,
+            explanation: q.explanation ?? null,
+          })
+          .select()
+          .single();
+
+        if (qErr) {
+          console.error('[PUT /api/quizzes/:id] insert question error:', qErr);
+          continue;
+        }
+
+        const options = Array.isArray(q.options) ? q.options : [];
+        if (options.length > 0) {
+          const optionRows = options.map((opt: any, oi: number) => ({
+            question_id: inserted.id,
+            content: opt.content ?? '',
+            is_correct: !!opt.is_correct,
+            order_index: oi + 1,
+          }));
+          const { error: optErr } = await supabase.from('question_options').insert(optionRows);
+          if (optErr) {
+            console.error('[PUT /api/quizzes/:id] insert options error:', optErr);
+          }
+        }
+
+        storedQuestions.push({ ...inserted, question_options: options });
+      }
+    }
+
+    return new Response(JSON.stringify({ quiz: updatedQuiz, questions: storedQuestions }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

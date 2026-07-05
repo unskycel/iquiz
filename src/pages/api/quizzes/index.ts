@@ -78,27 +78,80 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const { title, description, tags } = await request.json();
+    const body = await request.json();
+    // Accept either { title, description, tags } (legacy) or { quiz, questions } (QuizEditor)
+    const quizInput = body.quiz || body;
+    const questionsInput: any[] = Array.isArray(body.questions) ? body.questions : [];
+
+    const { title, description, tags } = quizInput;
+    if (!title || !String(title).trim()) {
+      return new Response(JSON.stringify({ error: 'Title is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const { data: quiz, error } = await supabase
       .from('quizzes')
       .insert({
         user_id: user.id,
         title,
-        description,
+        description: description ?? null,
         tags: tags || [],
       })
       .select()
       .single();
 
     if (error) {
+      console.error('[POST /api/quizzes] insert quiz error:', error);
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ quiz }), {
+    // Insert questions (with options) if provided
+    const storedQuestions: any[] = [];
+    for (let i = 0; i < questionsInput.length; i++) {
+      const q = questionsInput[i];
+      const { data: inserted, error: qErr } = await supabase
+        .from('questions')
+        .insert({
+          quiz_id: quiz.id,
+          type: q.type,
+          content: q.content,
+          order_index: i + 1,
+          correct_answer: q.correct_answer,
+          points: q.points ?? 1,
+          explanation: q.explanation ?? null,
+        })
+        .select()
+        .single();
+
+      if (qErr) {
+        console.error('[POST /api/quizzes] insert question error:', qErr);
+        continue;
+      }
+
+      // Insert options if present
+      const options = Array.isArray(q.options) ? q.options : [];
+      if (options.length > 0) {
+        const optionRows = options.map((opt: any, oi: number) => ({
+          question_id: inserted.id,
+          content: opt.content ?? '',
+          is_correct: !!opt.is_correct,
+          order_index: oi + 1,
+        }));
+        const { error: optErr } = await supabase.from('question_options').insert(optionRows);
+        if (optErr) {
+          console.error('[POST /api/quizzes] insert options error:', optErr);
+        }
+      }
+
+      storedQuestions.push({ ...inserted, question_options: options });
+    }
+
+    return new Response(JSON.stringify({ quiz, questions: storedQuestions }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
