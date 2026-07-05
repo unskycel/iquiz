@@ -128,7 +128,8 @@ export const PUT: APIRoute = async ({ params, request }) => {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    console.error('[PUT /api/attempts/:id/answer] error:', error);
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Internal server error', stack: error instanceof Error ? error.stack : undefined }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

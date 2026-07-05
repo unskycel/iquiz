@@ -18,7 +18,7 @@ export function gradeAnswer(
       return gradeTrueFalse(correct_answer as string, userAnswer as string, points);
 
     case 'fill_blank':
-      return gradeFillBlank(correct_answer as string, userAnswer as string, points);
+      return gradeFillBlank(correct_answer as string | string[], userAnswer as string, points);
 
     case 'short_answer':
       return gradeShortAnswer(correct_answer as string, userAnswer as string, points);
@@ -124,12 +124,18 @@ function gradeTrueFalse(
 }
 
 function gradeFillBlank(
-  correctAnswer: string,
+  correctAnswer: string | string[],
   userAnswer: string | string[],
   points: number
 ): { isCorrect: boolean; pointsAwarded: number } {
-  // Multi-blank fill-in: correct_answer stored as JSON array string e.g. '["空1","空2"]'
-  const parsedCorrect = parseFillBlankAnswer(correctAnswer);
+  // DB may store correct_answer as a JS array directly (supabase-js jsonb/json column),
+  // or as a JSON stringified array (e.g. '["a","b"]'), or as a plain string.
+  let parsedCorrect: string | string[];
+  if (Array.isArray(correctAnswer)) {
+    parsedCorrect = correctAnswer.map(String);
+  } else {
+    parsedCorrect = parseFillBlankAnswer(correctAnswer);
+  }
   const isMultiBlank = Array.isArray(parsedCorrect);
 
   if (isMultiBlank) {
@@ -138,7 +144,7 @@ function gradeFillBlank(
 
   // Single blank: simple case-insensitive comparison
   const normalizedCorrect = (parsedCorrect as string).toLowerCase().trim();
-  const normalizedUser = (typeof userAnswer === 'string' ? userAnswer : userAnswer[0] || '').toLowerCase().trim();
+  const normalizedUser = (typeof userAnswer === 'string' ? userAnswer : (Array.isArray(userAnswer) ? userAnswer[0] || '' : '')).toLowerCase().trim();
   const isCorrect = normalizedCorrect === normalizedUser;
   return { isCorrect, pointsAwarded: isCorrect ? points : 0 };
 }
