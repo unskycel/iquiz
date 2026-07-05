@@ -46,6 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
         user_id: user.id,
         quiz_id: quizId,
         total_points: totalPoints,
+        time_taken: 0,
       })
       .select()
       .single();
