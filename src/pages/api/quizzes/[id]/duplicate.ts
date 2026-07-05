@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../lib/supabase-server';
 
 export const POST: APIRoute = async ({ params, request }) => {
   try {
@@ -30,7 +31,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // Get original quiz
-    const { data: originalQuiz, error: fetchError } = await supabase
+    const { data: originalQuiz, error: fetchError } = await supabaseAdmin
       .from('quizzes')
       .select('*')
       .eq('id', id)
@@ -52,7 +53,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // Create new quiz
-    const { data: newQuiz, error: createError } = await supabase
+    const { data: newQuiz, error: createError } = await supabaseAdmin
       .from('quizzes')
       .insert({
         user_id: user.id,
@@ -71,7 +72,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // Get original questions
-    const { data: originalQuestions, error: questionsError } = await supabase
+    const { data: originalQuestions, error: questionsError } = await supabaseAdmin
       .from('questions')
       .select('*, question_options(*)')
       .eq('quiz_id', id)
@@ -88,7 +89,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     for (const question of originalQuestions || []) {
       const { question_options, ...questionData } = question;
       
-      const { data: newQuestion, error: questionError } = await supabase
+      const { data: newQuestion, error: questionError } = await supabaseAdmin
         .from('questions')
         .insert({
           quiz_id: newQuiz.id,
@@ -116,7 +117,7 @@ export const POST: APIRoute = async ({ params, request }) => {
           order_index: option.order_index,
         }));
 
-        await supabase.from('question_options').insert(optionsToInsert);
+        await supabaseAdmin.from('question_options').insert(optionsToInsert);
       }
     }
 

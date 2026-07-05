@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../../lib/supabase-server';
 
 export const PUT: APIRoute = async ({ params, request }) => {
   try {
@@ -30,7 +31,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     }
 
     // Check quiz ownership
-    const { data: quiz, error: fetchError } = await supabase
+    const { data: quiz, error: fetchError } = await supabaseAdmin
       .from('quizzes')
       .select('user_id')
       .eq('id', id)
@@ -60,7 +61,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
     // Batch update
     for (const update of updates) {
-      await supabase
+      await supabaseAdmin
         .from('questions')
         .update({ order_index: update.order_index })
         .eq('id', update.id)

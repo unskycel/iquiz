@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../../lib/supabase-server';
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
@@ -11,7 +12,7 @@ export const GET: APIRoute = async ({ params, request }) => {
       });
     }
 
-    const { data: questions, error } = await supabase
+    const { data: questions, error } = await supabaseAdmin
       .from('questions')
       .select('*, question_options(*)')
       .eq('quiz_id', id)
@@ -65,7 +66,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // Check quiz ownership
-    const { data: quiz, error: fetchError } = await supabase
+    const { data: quiz, error: fetchError } = await supabaseAdmin
       .from('quizzes')
       .select('user_id')
       .eq('id', id)
@@ -88,7 +89,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     const { type, content, correct_answer, points, explanation, options } = await request.json();
 
     // Get next order index
-    const { data: lastQuestion } = await supabase
+    const { data: lastQuestion } = await supabaseAdmin
       .from('questions')
       .select('order_index')
       .eq('quiz_id', id)
@@ -99,7 +100,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     const nextOrderIndex = lastQuestion ? lastQuestion.order_index + 1 : 1;
 
     // Create question
-    const { data: question, error: questionError } = await supabase
+    const { data: question, error: questionError } = await supabaseAdmin
       .from('questions')
       .insert({
         quiz_id: id,
@@ -129,11 +130,11 @@ export const POST: APIRoute = async ({ params, request }) => {
         order_index: index + 1,
       }));
 
-      await supabase.from('question_options').insert(optionsToInsert);
+      await supabaseAdmin.from('question_options').insert(optionsToInsert);
     }
 
     // Fetch question with options
-    const { data: questionWithOptions } = await supabase
+    const { data: questionWithOptions } = await supabaseAdmin
       .from('questions')
       .select('*, question_options(*)')
       .eq('id', question.id)

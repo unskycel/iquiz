@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../lib/supabase';
+import { supabaseAdmin } from '../../../../lib/supabase-server';
 
 export const PUT: APIRoute = async ({ params, request }) => {
   try {
@@ -30,7 +31,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     }
 
     // Check ownership
-    const { data: quiz, error: fetchError } = await supabase
+    const { data: quiz, error: fetchError } = await supabaseAdmin
       .from('quizzes')
       .select('user_id, is_published')
       .eq('id', id)
@@ -51,7 +52,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     }
 
     // Toggle published status
-    const { data: updatedQuiz, error } = await supabase
+    const { data: updatedQuiz, error } = await supabaseAdmin
       .from('quizzes')
       .update({ is_published: !quiz.is_published })
       .eq('id', id)
