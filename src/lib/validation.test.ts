@@ -126,6 +126,16 @@ describe('validateQuestion', () => {
       const result = validateQuestion(q);
       expect(result?.correctAnswer).toBe('请选择正确或错误');
     });
+
+    it('答案 "√" → null', () => {
+      const q = makeQuestion({ type: 'true_false', correct_answer: '√' });
+      expect(validateQuestion(q)).toBeNull();
+    });
+
+    it('答案 "×" → null', () => {
+      const q = makeQuestion({ type: 'true_false', correct_answer: '×' });
+      expect(validateQuestion(q)).toBeNull();
+    });
   });
 
   // ── fill_blank ──
@@ -157,6 +167,17 @@ describe('validateQuestion', () => {
       const result = validateQuestion(q);
       expect(result?.correctAnswer).toBe('答案格式错误');
     });
+
+    it('答案为数组（多空）→ null', () => {
+      const q = makeQuestion({ type: 'fill_blank', correct_answer: ['开发软件', '维护软件'] as any });
+      expect(validateQuestion(q)).toBeNull();
+    });
+
+    it('答案为数组且有空值 → error', () => {
+      const q = makeQuestion({ type: 'fill_blank', correct_answer: ['A', ''] as any });
+      const result = validateQuestion(q);
+      expect(result?.correctAnswer).toContain('1 个空');
+    });
   });
 
   // ── short_answer ──
@@ -170,6 +191,13 @@ describe('validateQuestion', () => {
       const q = makeQuestion({ type: 'short_answer', correct_answer: '' });
       const result = validateQuestion(q);
       expect(result?.correctAnswer).toBe('参考答案不能为空');
+    });
+
+    it('答案为数组（防御）→ error', () => {
+      const q = makeQuestion({ type: 'short_answer', correct_answer: ['a', 'b'] as any });
+      const result = validateQuestion(q);
+      // 数组取首元素，都非空 → 通过
+      expect(result).toBeNull();
     });
   });
 

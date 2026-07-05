@@ -73,38 +73,52 @@ export function validateQuestion(
     }
 
     case 'true_false': {
-      const answer = question.correct_answer as string;
-      if (!answer || (answer !== 'true' && answer !== 'false')) {
+      const answer = question.correct_answer;
+      const answerStr = Array.isArray(answer) ? String(answer[0] ?? '') : (answer == null ? '' : String(answer));
+      const normalized = answerStr.trim().toLowerCase();
+      const isValid = normalized === 'true' || normalized === 'false' || normalized === 't' || normalized === 'f' || answerStr.trim() === '√' || answerStr.trim() === '×';
+      if (!isValid) {
         errors.correctAnswer = '请选择正确或错误';
       }
       break;
     }
 
     case 'fill_blank': {
-      const answer = question.correct_answer as string;
-      if (!answer || !answer.trim()) {
-        errors.correctAnswer = '正确答案不能为空';
-      }
-      // 如果是 JSON 数组格式，检查每个空
-      if (answer && answer.trim().startsWith('[')) {
-        try {
-          const parsed = JSON.parse(answer);
-          if (Array.isArray(parsed)) {
-            const emptyBlanks = parsed.filter((s: unknown) => !String(s).trim());
-            if (emptyBlanks.length > 0) {
-              errors.correctAnswer = `有 ${emptyBlanks.length} 个空的答案未填写`;
+      const answer = question.correct_answer;
+      if (Array.isArray(answer)) {
+        // 多空答案：逐个检查
+        const emptyBlanks = answer.filter((s) => !String(s ?? '').trim());
+        if (emptyBlanks.length > 0) {
+          errors.correctAnswer = `有 ${emptyBlanks.length} 个空的答案未填写`;
+        }
+        if (answer.length === 0) {
+          errors.correctAnswer = '正确答案不能为空';
+        }
+      } else {
+        const answerStr = answer == null ? '' : String(answer);
+        if (!answerStr.trim()) {
+          errors.correctAnswer = '正确答案不能为空';
+        } else if (answerStr.trim().startsWith('[')) {
+          try {
+            const parsed = JSON.parse(answerStr);
+            if (Array.isArray(parsed)) {
+              const emptyBlanks = parsed.filter((s: unknown) => !String(s).trim());
+              if (emptyBlanks.length > 0) {
+                errors.correctAnswer = `有 ${emptyBlanks.length} 个空的答案未填写`;
+              }
             }
+          } catch {
+            errors.correctAnswer = '答案格式错误';
           }
-        } catch {
-          errors.correctAnswer = '答案格式错误';
         }
       }
       break;
     }
 
     case 'short_answer': {
-      const answer = question.correct_answer as string;
-      if (!answer || !answer.trim()) {
+      const answer = question.correct_answer;
+      const answerStr = Array.isArray(answer) ? String(answer[0] ?? '') : (answer == null ? '' : String(answer));
+      if (!answerStr.trim()) {
         errors.correctAnswer = '参考答案不能为空';
       }
       break;
