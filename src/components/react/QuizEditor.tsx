@@ -126,7 +126,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
     });
     setQuestionErrors(errors.questions);
 
-    if (quiz.title.trim() && questions.length === 0) {
+    if ((quiz.title || '').trim() && questions.length === 0) {
       setValidationError('请至少添加一道题目');
       return;
     }
@@ -199,7 +199,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
               type="text"
               value={quiz.title}
               onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${(validationError && !quiz.title.trim()) ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${(validationError && !(quiz.title || '').trim()) ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
               placeholder="输入习题标题"
             />
           </div>
@@ -217,7 +217,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
             <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
             <input
               type="text"
-              value={quiz.tags.join(', ')}
+              value={(quiz.tags || []).join(', ')}
               onChange={(e) => setQuiz({ ...quiz, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
               placeholder="用逗号分隔多个标签"
