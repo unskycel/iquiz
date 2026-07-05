@@ -9,20 +9,20 @@ export function gradeAnswer(
   
   switch (type) {
     case 'single_choice':
-      return gradeSingleChoice(correct_answer as string, userAnswer as string, points);
-    
+      return gradeSingleChoice(correct_answer as string, userAnswer as string, points, options);
+
     case 'multiple_choice':
-      return gradeMultipleChoice(correct_answer as string[], userAnswer as string[], points);
-    
+      return gradeMultipleChoice(correct_answer as string[], userAnswer as string[], points, options);
+
     case 'true_false':
       return gradeTrueFalse(correct_answer as string, userAnswer as string, points);
-    
+
     case 'fill_blank':
       return gradeFillBlank(correct_answer as string, userAnswer as string, points);
-    
+
     case 'short_answer':
       return gradeShortAnswer(correct_answer as string, userAnswer as string, points);
-    
+
     default:
       return { isCorrect: false, pointsAwarded: 0 };
   }
@@ -31,32 +31,62 @@ export function gradeAnswer(
 function gradeSingleChoice(
   correctAnswer: string,
   userAnswer: string,
-  points: number
+  points: number,
+  options?: QuestionOption[]
 ): { isCorrect: boolean; pointsAwarded: number } {
-  const isCorrect = correctAnswer === userAnswer;
+  // Resolve correctAnswer to option content for comparison
+  // (DB stores correct_answer as option id, but user submits option content)
+  let resolvedCorrect = correctAnswer;
+  if (options && options.length > 0) {
+    const byContent = options.find((o) => o.content === correctAnswer);
+    if (!byContent) {
+      // correctAnswer is likely an id; find the matching option
+      const byId = options.find((o) => o.id === correctAnswer);
+      if (byId) resolvedCorrect = byId.content;
+    }
+    // Also resolve userAnswer to id and compare by id as fallback
+    const userOpt = options.find((o) => o.content === userAnswer);
+    if (userOpt && userOpt.id === resolvedCorrect) {
+      return { isCorrect: true, pointsAwarded: points };
+    }
+    if (userOpt && userOpt.id === correctAnswer) {
+      return { isCorrect: true, pointsAwarded: points };
+    }
+  }
+  const isCorrect = resolvedCorrect === userAnswer;
   return { isCorrect, pointsAwarded: isCorrect ? points : 0 };
 }
 
 function gradeMultipleChoice(
   correctAnswers: string[],
   userAnswers: string[],
-  points: number
+  points: number,
+  options?: QuestionOption[]
 ): { isCorrect: boolean; pointsAwarded: number } {
-  const sortedCorrect = [...correctAnswers].sort();
+  // Resolve correctAnswers from option id to content (if options provided)
+  const resolvedCorrect = options && options.length > 0
+    ? correctAnswers.map((c) => {
+        if (options.some((o) => o.content === c)) return c; // already content
+        const byId = options.find((o) => o.id === c);
+        return byId ? byId.content : c;
+      })
+    : correctAnswers;
+
+  const sortedCorrect = [...resolvedCorrect].sort();
   const sortedUser = [...userAnswers].sort();
-  const isCorrect = 
+  const isCorrect =
     sortedCorrect.length === sortedUser.length &&
     sortedCorrect.every((answer, index) => answer === sortedUser[index]);
-  
+
   // Partial credit for multiple choice
   if (isCorrect) {
     return { isCorrect: true, pointsAwarded: points };
   }
-  
+
   // Calculate partial credit
   const correctCount = sortedUser.filter(answer => sortedCorrect.includes(answer)).length;
   const partialPoints = Math.floor((correctCount / sortedCorrect.length) * points);
-  
+
   return { isCorrect: false, pointsAwarded: partialPoints };
 }
 
