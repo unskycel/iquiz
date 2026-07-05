@@ -230,7 +230,7 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
 
       {/* Flashcard */}
       <div
-        className="bg-white rounded-lg shadow-sm p-8 mb-6 min-h-[300px] select-none touch-pan-y"
+        className="bg-white rounded-lg shadow-sm p-8 mb-6 min-h-[420px] flex flex-col select-none touch-pan-y"
         onTouchStart={(e) => {
           touchStartX.current = e.touches[0].clientX;
           touchStartY.current = e.touches[0].clientY;
@@ -389,8 +389,9 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         })()}
 
         {/* 答案区：所有题型都根据 showAnswer 翻面 */}
+        <div className="border-t pt-6 flex-1 flex flex-col justify-center min-h-[140px]">
         {showAnswer ? (
-          <div className="border-t pt-6">
+          <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-sm font-medium text-green-600">✓ 正确答案</span>
               <span className="text-xs text-gray-400">点击卡片或按钮隐藏</span>
@@ -405,11 +406,12 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
             )}
           </div>
         ) : (
-          <div className="border-t pt-6 text-center py-4 text-gray-400">
+          <div className="text-center py-4 text-gray-400">
             <div className="text-3xl mb-1">👁</div>
             <p className="text-sm">点击卡片查看答案</p>
           </div>
         )}
+        </div>
       </div>
 
       {/* Navigation */}
