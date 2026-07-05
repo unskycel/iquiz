@@ -35,25 +35,36 @@ function gradeSingleChoice(
   options?: QuestionOption[]
 ): { isCorrect: boolean; pointsAwarded: number } {
   // Resolve correctAnswer to option content for comparison
-  // (DB stores correct_answer as option id, but user submits option content)
-  let resolvedCorrect = correctAnswer;
+  // (DB may store correct_answer as: option id UUID, letter label "B", or content text)
   if (options && options.length > 0) {
+    // 1. Try matching as a letter label (A/B/C/D) by position
+    const letterIdx = ['A', 'B', 'C', 'D', 'E', 'F'].indexOf(correctAnswer.trim().toUpperCase());
+    if (letterIdx >= 0 && letterIdx < options.length) {
+      const correctContent = options[letterIdx].content;
+      if (userAnswer === correctContent) {
+        return { isCorrect: true, pointsAwarded: points };
+      }
+    }
+
+    // 2. Try matching as option id (UUID)
+    const byId = options.find((o) => o.id === correctAnswer);
+    if (byId) {
+      if (userAnswer === byId.content) {
+        return { isCorrect: true, pointsAwarded: points };
+      }
+    }
+
+    // 3. Try matching as content directly
     const byContent = options.find((o) => o.content === correctAnswer);
-    if (!byContent) {
-      // correctAnswer is likely an id; find the matching option
-      const byId = options.find((o) => o.id === correctAnswer);
-      if (byId) resolvedCorrect = byId.content;
+    if (byContent) {
+      if (userAnswer === byContent.content) {
+        return { isCorrect: true, pointsAwarded: points };
+      }
     }
-    // Also resolve userAnswer to id and compare by id as fallback
-    const userOpt = options.find((o) => o.content === userAnswer);
-    if (userOpt && userOpt.id === resolvedCorrect) {
-      return { isCorrect: true, pointsAwarded: points };
-    }
-    if (userOpt && userOpt.id === correctAnswer) {
-      return { isCorrect: true, pointsAwarded: points };
-    }
+
+    // Fall through to direct string compare
   }
-  const isCorrect = resolvedCorrect === userAnswer;
+  const isCorrect = correctAnswer === userAnswer;
   return { isCorrect, pointsAwarded: isCorrect ? points : 0 };
 }
 
@@ -63,12 +74,19 @@ function gradeMultipleChoice(
   points: number,
   options?: QuestionOption[]
 ): { isCorrect: boolean; pointsAwarded: number } {
-  // Resolve correctAnswers from option id to content (if options provided)
+  // Resolve each correctAnswer: may be letter label, id, or content
   const resolvedCorrect = options && options.length > 0
     ? correctAnswers.map((c) => {
-        if (options.some((o) => o.content === c)) return c; // already content
+        const trimmed = c.trim().toUpperCase();
+        const letterIdx = ['A', 'B', 'C', 'D', 'E', 'F'].indexOf(trimmed);
+        if (letterIdx >= 0 && letterIdx < options.length) {
+          return options[letterIdx].content;
+        }
         const byId = options.find((o) => o.id === c);
-        return byId ? byId.content : c;
+        if (byId) return byId.content;
+        const byContent = options.find((o) => o.content === c);
+        if (byContent) return byContent.content;
+        return c;
       })
     : correctAnswers;
 
