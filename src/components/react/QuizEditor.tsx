@@ -27,6 +27,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
   const [isSaving, setIsSaving] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [questionErrors, setQuestionErrors] = useState<(QuestionError | null)[]>([]);
 
   // 如果传了 quizId 但没传 initialQuiz，从 API 加载
@@ -99,6 +100,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
   const handleSave = async () => {
     setValidationError(null);
     setSaveError(null);
+    setSaveSuccess(null);
 
     // 收集每道题的选项（从 DOM 或 state 无法直接拿到，需要通过 QuestionForm 暴露）
     // 这里用一个 ref map 来收集 options
@@ -165,6 +167,10 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
         if (data.quiz?.id && !quizId) {
           // 跳到编辑页继续操作
           window.location.href = `/quiz/${data.quiz.id}`;
+        } else {
+          // 编辑模式：显示成功提示
+          setSaveSuccess('保存成功');
+          setTimeout(() => setSaveSuccess(null), 2000);
         }
       }
     } catch (error) {
@@ -327,6 +333,14 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
           <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center justify-between">
             <span>{saveError}</span>
             <button onClick={() => setSaveError(null)} className="text-red-400 hover:text-red-600">&times;</button>
+          </div>
+        )}
+        {saveSuccess && (
+          <div className="p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>{saveSuccess}</span>
           </div>
         )}
         <div className="flex justify-end space-x-4">
