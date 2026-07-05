@@ -125,28 +125,30 @@ function FillBlankEditor({
 
   const handleTypeChange = (type: Question['type']) => {
     const updates: Partial<Question> = { type };
+    let newOptions: QuestionOption[] = [];
     
     // Reset correct_answer based on type
     if (type === 'multiple_choice') {
       updates.correct_answer = [];
     } else if (type === 'true_false') {
       updates.correct_answer = 'true';
-      setOptions([
+      newOptions = [
         { id: '1', question_id: question.id, content: '正确', is_correct: true, order_index: 1 },
         { id: '2', question_id: question.id, content: '错误', is_correct: false, order_index: 2 },
-      ]);
+      ];
     } else {
       updates.correct_answer = '';
-      setOptions([]);
     }
     
-    onUpdate(updates);
+    setOptions(newOptions);
+    onUpdate({ ...updates, question_options: newOptions });
   };
 
   const handleOptionChange = (optionIndex: number, content: string) => {
     const newOptions = [...options];
     newOptions[optionIndex] = { ...newOptions[optionIndex], content };
     setOptions(newOptions);
+    onUpdate({ question_options: newOptions });
   };
 
   const handleCorrectChange = (optionIndex: number) => {
@@ -156,7 +158,7 @@ function FillBlankEditor({
         is_correct: i === optionIndex,
       }));
       setOptions(newOptions);
-      onUpdate({ correct_answer: options[optionIndex].content });
+      onUpdate({ correct_answer: options[optionIndex].content, question_options: newOptions });
     } else if (question.type === 'multiple_choice') {
       const newOptions = [...options];
       newOptions[optionIndex] = {
@@ -168,6 +170,7 @@ function FillBlankEditor({
         correct_answer: newOptions
           .filter(opt => opt.is_correct)
           .map(opt => opt.content),
+        question_options: newOptions,
       });
     }
   };
@@ -180,12 +183,15 @@ function FillBlankEditor({
       is_correct: false,
       order_index: options.length + 1,
     };
-    setOptions([...options, newOption]);
+    const newOptions = [...options, newOption];
+    setOptions(newOptions);
+    onUpdate({ question_options: newOptions });
   };
 
   const removeOption = (optionIndex: number) => {
     const newOptions = options.filter((_, i) => i !== optionIndex);
     setOptions(newOptions);
+    onUpdate({ question_options: newOptions });
   };
 
   const getTypeLabel = (type: Question['type']): string => {

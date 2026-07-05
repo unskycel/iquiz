@@ -158,7 +158,12 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
         if (token) headers['Authorization'] = `Bearer ${token}`;
         const url = quizId ? `/api/quizzes/${quizId}` : '/api/quizzes';
         const method = quizId ? 'PUT' : 'POST';
-        const res = await fetch(url, { method, headers, body: JSON.stringify({ quiz, questions }) });
+        // Map question_options → options so PUT handler picks them up
+        const payload = questions.map(q => ({
+          ...q,
+          options: q.question_options || q.options || [],
+        }));
+        const res = await fetch(url, { method, headers, body: JSON.stringify({ quiz, questions: payload }) });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.error || `HTTP ${res.status}`);
