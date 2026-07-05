@@ -227,11 +227,23 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
         onMouseUp={(e) => {
           if (mouseStartX.current === null) return;
           const dx = e.clientX - mouseStartX.current;
+          mouseStartX.current = null;
+          // 拖拽超过 80px 才是滑动，否则视为点击
           if (Math.abs(dx) > 80) {
             if (dx > 0 && currentIndex > 0) setCurrentIndex(currentIndex - 1);
             else if (dx < 0 && currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1);
+          } else {
+            // 桌面点击 — 触发选择题型翻面
+            if (currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice' || currentQuestion.type === 'true_false') {
+              setShowAnswer((s) => !s);
+            }
           }
-          mouseStartX.current = null;
+        }}
+        onClick={() => {
+          // 触摸端点击 — 选择题型翻面
+          if (currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice' || currentQuestion.type === 'true_false') {
+            setShowAnswer((s) => !s);
+          }
         }}
       >
         {/* 题型 + 分值 */}
@@ -347,58 +359,26 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
           );
         })()}
 
-        {/* 答案区 */}
-        {/* 选择题/判断题：选了选项后自动展示答案+解析 */}
-        {((currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice' || currentQuestion.type === 'true_false') && selectedOptions.size > 0) &&
-          currentQuestion.explanation && (
-            <div className="border-t pt-6">
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+        {/* 答案区：所有题型都根据 showAnswer 翻面 */}
+        {showAnswer ? (
+          <div className="border-t pt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm font-medium text-green-600">✓ 正确答案</span>
+              <span className="text-xs text-gray-400">点击卡片或按钮隐藏</span>
+            </div>
+            <div className="text-base">
+              {formatAnswer(currentQuestion)}
+            </div>
+            {currentQuestion.explanation && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
                 💡 {currentQuestion.explanation}
               </div>
-            </div>
-          )
-        }
-
-        {/* 填空题/简答题：点击翻面看答案 */}
-        {(currentQuestion.type === 'fill_blank' || currentQuestion.type === 'short_answer') && (
-          <div className="border-t pt-6">
-            {showAnswer ? (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-medium text-green-600">✓ 正确答案</span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowAnswer(false);
-                    }}
-                    className="text-xs text-gray-400 hover:text-gray-600"
-                  >
-                    点击隐藏
-                  </button>
-                </div>
-                <div className="text-base">
-                  {formatAnswer(currentQuestion)}
-                </div>
-                {currentQuestion.explanation && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-                    💡 {currentQuestion.explanation}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAnswer(true);
-                }}
-                className="w-full text-center py-6 text-gray-400 hover:text-gray-600"
-              >
-                <div className="text-4xl mb-2">👁</div>
-                <p className="text-sm">点击查看答案</p>
-              </button>
             )}
+          </div>
+        ) : (
+          <div className="border-t pt-6 text-center py-4 text-gray-400">
+            <div className="text-3xl mb-1">👁</div>
+            <p className="text-sm">点击卡片查看答案</p>
           </div>
         )}
       </div>
