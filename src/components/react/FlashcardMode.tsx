@@ -105,13 +105,17 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
       }
       case 'true_false':
         return (
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-            q.correct_answer === 'true' || q.correct_answer === '正确'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}>
-            {q.correct_answer === 'true' || q.correct_answer === '正确' ? '✓ 正确' : '✗ 错误'}
-          </span>
+          (() => {
+            const s = String(q.correct_answer).toLowerCase().trim();
+            const isTrue = s === 'true' || s === 't' || s === '√';
+            return (
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                isTrue ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              }`}>
+                {isTrue ? '✓ 正确' : '✗ 错误'}
+              </span>
+            );
+          })()
         );
       case 'fill_blank': {
         if (Array.isArray(q.correct_answer)) {
@@ -317,9 +321,14 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
 
         {/* 判断题选项 */}
         {currentQuestion.type === 'true_false' && (() => {
+          // 兼容: 'true'/'false' / '√'/'×' / 'T'/'F'
+          const correctVal = (() => {
+            const s = String(currentQuestion.correct_answer).toLowerCase().trim();
+            return (s === 'true' || s === 't' || s === '√') ? 'true' : 'false';
+          })();
           const tfOptions = [
-            { label: '正确', value: 'true', isCorrect: currentQuestion.correct_answer === 'true' || currentQuestion.correct_answer === '正确' },
-            { label: '错误', value: 'false', isCorrect: currentQuestion.correct_answer === 'false' || currentQuestion.correct_answer === '错误' },
+            { label: '正确', value: 'true', isCorrect: correctVal === 'true' },
+            { label: '错误', value: 'false', isCorrect: correctVal === 'false' },
           ];
           return (
             <div className="flex space-x-4 mb-6">

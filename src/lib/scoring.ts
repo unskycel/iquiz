@@ -65,7 +65,13 @@ function gradeTrueFalse(
   userAnswer: string,
   points: number
 ): { isCorrect: boolean; pointsAwarded: number } {
-  const isCorrect = correctAnswer.toLowerCase() === userAnswer.toLowerCase();
+  // 兼容: 'true'/'false' / '√'/'×' / 'T'/'F'（用户输入必须为 'true'/'false'）
+  const norm = (v: string) => {
+    const s = v.toLowerCase().trim();
+    if (s === 'true' || s === 't' || s === '√') return 'true';
+    return 'false';
+  };
+  const isCorrect = norm(correctAnswer) === norm(userAnswer);
   return { isCorrect, pointsAwarded: isCorrect ? points : 0 };
 }
 
