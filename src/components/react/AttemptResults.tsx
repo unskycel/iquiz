@@ -183,9 +183,17 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
         <h2 className="text-lg font-semibold px-1">答题详情</h2>
         {answers.map((answer, index) => {
           const question = answer.questions;
-          const userAnswer = Array.isArray(answer.user_answer)
+          const rawUserAnswer = Array.isArray(answer.user_answer)
             ? answer.user_answer.join(', ')
             : answer.user_answer || '(未作答)';
+          
+          // 判断题显示中文
+          const formatTF = (v: string) => {
+            if (v === 'true') return '正确';
+            if (v === 'false') return '错误';
+            return v;
+          };
+          const userAnswer = question.type === 'true_false' ? formatTF(String(rawUserAnswer)) : rawUserAnswer;
           
           let correctAnswer = '';
           if (question.type === 'single_choice') {
@@ -193,7 +201,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
           } else if (question.type === 'multiple_choice') {
             correctAnswer = (question.correct_answer as string[]).join(', ');
           } else if (question.type === 'true_false') {
-            correctAnswer = question.correct_answer as string;
+            correctAnswer = formatTF(String(question.correct_answer));
           } else if (question.type === 'fill_blank') {
             correctAnswer = formatCorrectAnswer(question.correct_answer);
           } else {

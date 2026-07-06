@@ -15,7 +15,7 @@ export function gradeAnswer(
       return gradeMultipleChoice(correct_answer as string[], userAnswer as string[], points, options);
 
     case 'true_false':
-      return gradeTrueFalse(correct_answer as string, userAnswer as string, points);
+      return gradeTrueFalse(correct_answer as string | boolean, userAnswer as string | boolean, points);
 
     case 'fill_blank':
       return gradeFillBlank(correct_answer as string | string[], userAnswer as string, points);
@@ -109,14 +109,16 @@ function gradeMultipleChoice(
 }
 
 function gradeTrueFalse(
-  correctAnswer: string,
-  userAnswer: string,
+  correctAnswer: string | boolean,
+  userAnswer: string | boolean,
   points: number
 ): { isCorrect: boolean; pointsAwarded: number } {
-  // 兼容: 'true'/'false' / '√'/'×' / 'T'/'F'（用户输入必须为 'true'/'false'）
-  const norm = (v: string) => {
-    const s = v.toLowerCase().trim();
-    if (s === 'true' || s === 't' || s === '√') return 'true';
+  // 兼容: 'true'/'false' / true/false / '√'/'×' / 'T'/'F' / '正确'/'错误'
+  const norm = (v: string | boolean): 'true' | 'false' => {
+    if (typeof v === 'boolean') return v ? 'true' : 'false';
+    const s = String(v).toLowerCase().trim();
+    if (s === 'true' || s === 't' || s === '√' || s === '正确' || s === '对') return 'true';
+    if (s === 'false' || s === 'f' || s === '×' || s === '错误' || s === '错') return 'false';
     return 'false';
   };
   const isCorrect = norm(correctAnswer) === norm(userAnswer);
