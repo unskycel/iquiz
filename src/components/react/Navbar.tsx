@@ -64,7 +64,12 @@ export function Navbar() {
   };
 
   if (loading) {
-    return <div className="flex items-center space-x-4 h-16" />;
+    return (
+      <div className="flex items-center space-x-2 h-16">
+        <div className="w-16 h-8 bg-muted/50 rounded animate-pulse" />
+        <ThemeToggle />
+      </div>
+    );
   }
 
   const navLinkClass = "block px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -79,6 +84,9 @@ export function Navbar() {
       </a>
       <a href="/history" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
         答题历史
+      </a>
+      <a href="/wrong-answers" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
+        错题集
       </a>
       <span className="hidden md:block px-3 py-2 text-sm text-muted-foreground/80 max-w-[180px] truncate">{user.email}</span>
       <button

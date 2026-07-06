@@ -1,0 +1,10 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { WrongAnswers } from '../components/react/WrongAnswers';
+
+const title = '错题集 - iQuiz';
+---
+
+<MainLayout title={title}>
+  <WrongAnswers client:load />
+</MainLayout>
