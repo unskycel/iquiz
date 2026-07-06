@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Question, QuizAttempt } from '../../types';
 import { getAccessToken, authHeaders } from '../../lib/auth-client';
+import { getBlankCount } from '../../lib/format';
 
 interface QuizRunnerProps {
   quizId?: string;
@@ -206,21 +207,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getBlankCount = (correctAnswer: string | string[]): number => {
-    if (Array.isArray(correctAnswer)) {
-      return correctAnswer.length;
-    }
-    if (typeof correctAnswer === 'string' && correctAnswer.trim().startsWith('[')) {
-      try {
-        const parsed = JSON.parse(correctAnswer);
-        if (Array.isArray(parsed) && parsed.length > 1) {
-          return parsed.length;
-        }
-      } catch { /* fall through */ }
-    }
-    return 1;
   };
 
   const renderQuestion = () => {
