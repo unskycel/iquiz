@@ -294,41 +294,9 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
         )}
       </div>
 
-      {/* Navigation buttons */}
-      <div className="mt-5">
-        {/* 移动端：仅上一题/下一题 + 当前题号 */}
-        <div className="flex justify-between items-center gap-2 sm:hidden">
-          <button
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent whitespace-nowrap px-3 py-2"
-          >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-            上一题
-          </button>
-
-          <div className="text-center text-sm text-muted-foreground tabular-nums whitespace-nowrap">
-            <span className="font-semibold text-foreground">{currentIndex + 1}</span>
-            <span className="mx-1">/</span>
-            <span>{questions.length}</span>
-          </div>
-
-          <button
-            onClick={handleNext}
-            disabled={currentIndex === questions.length - 1}
-            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap px-3 py-2"
-          >
-            下一题
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        </div>
-
-        {/* 桌面端：包含圆点导航 */}
-        <div className="hidden sm:flex justify-between items-center gap-3">
+      {/* Navigation buttons — 桌面端 */}
+      <div className="mt-5 hidden sm:block">
+        <div className="flex justify-between items-center gap-3">
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
@@ -373,11 +341,46 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             </svg>
           </button>
         </div>
+
+        <p className="text-center text-muted-foreground/60 text-xs mt-4">
+          支持左右滑动切换卡片
+        </p>
       </div>
 
-      {/* Tip */}
-      <p className="text-center text-muted-foreground/60 text-xs mt-4">
-        支持左右滑动切换卡片
+      {/* 移动端悬浮导航 */}
+      <div className="sm:hidden fixed bottom-6 inset-x-0 z-50 flex justify-between items-center px-4 pointer-events-none">
+        <button
+          onClick={handlePrev}
+          disabled={currentIndex === 0}
+          className="pointer-events-auto w-12 h-12 rounded-full bg-background/90 backdrop-blur-md border border-border shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
+          aria-label="上一题"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <div className="pointer-events-auto px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border shadow-lg text-sm tabular-nums">
+          <span className="font-semibold text-foreground">{currentIndex + 1}</span>
+          <span className="mx-1 text-muted-foreground">/</span>
+          <span className="text-muted-foreground">{questions.length}</span>
+        </div>
+
+        <button
+          onClick={handleNext}
+          disabled={currentIndex === questions.length - 1}
+          className="pointer-events-auto w-12 h-12 rounded-full bg-primary/90 backdrop-blur-md text-primary-foreground shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95"
+          aria-label="下一题"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+
+      {/* 移动端提示 */}
+      <p className="text-center text-muted-foreground/60 text-xs mt-4 sm:hidden">
+        支持左右滑动切换
       </p>
     </div>
   );
