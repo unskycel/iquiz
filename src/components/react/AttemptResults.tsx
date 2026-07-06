@@ -115,7 +115,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
           </svg>
         </div>
         <p className="text-destructive mb-4">{error || '加载失败'}</p>
-        <a href="/dashboard" className="btn-primary inline-block">
+        <a href="/dashboard" className="btn-primary inline-flex items-center gap-2">
           返回控制台
         </a>
       </div>
@@ -143,7 +143,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
           </div>
           <button
             onClick={handleExportPDF}
-            className="btn-outline text-sm inline-flex items-center gap-1.5"
+            className="btn-outline text-sm"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0L16.5 7.5M12 3v13.5" />
@@ -272,7 +272,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
         <a href="/dashboard" className="btn-outline">
           返回控制台
         </a>
-        <a href={`/quiz/${attempt.quiz_id}/take`} className="btn-primary inline-flex items-center gap-2">
+        <a href={`/quiz/${attempt.quiz_id}/take`} className="btn-primary">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>

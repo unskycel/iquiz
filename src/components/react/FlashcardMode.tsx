@@ -128,7 +128,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
           </svg>
         </div>
         <p className="text-destructive mb-4">{error}</p>
-        <a href="/dashboard" className="btn-primary inline-block">返回控制台</a>
+        <a href="/dashboard" className="btn-primary">返回控制台</a>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
           </svg>
         </div>
         <p className="text-muted-foreground mb-4">该习题还没有题目</p>
-        <a href="/dashboard" className="btn-primary inline-block">返回控制台</a>
+        <a href="/dashboard" className="btn-primary">返回控制台</a>
       </div>
     );
   }
@@ -206,13 +206,13 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             
             {/* 选择题选项 */}
             {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') && currentQuestion.question_options && currentQuestion.question_options.length > 0 && (
-              <div className="space-y-2.5 mb-6 text-left">
+              <div className="space-y-2.5 mb-6">
                 {currentQuestion.question_options.map((option, idx) => (
                   <div
                     key={option.id}
-                    className="flex items-center p-3 border border-border rounded-xl bg-muted/30"
+                    className="flex items-center justify-center p-3 border border-border rounded-xl bg-muted/30 gap-3"
                   >
-                    <span className="w-7 h-7 flex items-center justify-center rounded-lg mr-3 flex-shrink-0 font-semibold text-sm bg-muted text-muted-foreground">
+                    <span className="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 font-semibold text-sm bg-muted text-muted-foreground">
                       {String.fromCharCode(65 + idx)}
                     </span>
                     <span className="text-foreground">{option.content}</span>
@@ -285,7 +285,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent inline-flex items-center gap-1 whitespace-nowrap px-3 py-2"
+            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent whitespace-nowrap px-3 py-2"
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -302,7 +302,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
           <button
             onClick={handleNext}
             disabled={currentIndex === questions.length - 1}
-            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1 whitespace-nowrap px-3 py-2"
+            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap px-3 py-2"
           >
             下一题
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -316,7 +316,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent inline-flex items-center gap-1.5 whitespace-nowrap"
+            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
@@ -349,7 +349,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
           <button
             onClick={handleNext}
             disabled={currentIndex === questions.length - 1}
-            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5 whitespace-nowrap"
+            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
           >
             下一题
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>

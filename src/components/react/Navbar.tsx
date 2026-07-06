@@ -94,7 +94,7 @@ export function Navbar() {
       </a>
       <a
         href="/auth/register"
-        className="btn-primary text-sm px-4 py-2 inline-block text-center md:inline-flex"
+        className="btn-primary text-sm px-4 py-2"
         onClick={() => setMobileMenuOpen(false)}
       >
         注册

@@ -197,7 +197,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
           </svg>
         </div>
         <p className="text-destructive mb-4">{loadError}</p>
-        <button onClick={onCancel} className="btn-primary">返回</button>
+        <button onClick={onCancel} className="btn-primary inline-flex items-center gap-2">返回</button>
       </div>
     );
   }
@@ -350,7 +350,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="btn-primary disabled:opacity-50 inline-flex items-center gap-2"
+            className="btn-primary disabled:opacity-50"
           >
             {isSaving ? (
               <>

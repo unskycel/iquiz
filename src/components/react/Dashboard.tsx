@@ -162,7 +162,7 @@ export function Dashboard({ userId }: DashboardProps) {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">我的习题</h2>
-          <a href="/quiz/create" className="btn-primary text-sm inline-flex items-center gap-1.5">
+          <a href="/quiz/create" className="btn-primary text-sm">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
@@ -197,13 +197,13 @@ export function Dashboard({ userId }: DashboardProps) {
                   {formatDate(quiz.created_at)}
                 </div>
                 <div className="flex gap-2">
-                  <a href={`/quiz/${quiz.id}`} className="flex-1 text-center py-2 border border-border rounded-lg hover:bg-accent/10 hover:border-accent/30 text-sm font-medium transition-all">
+                  <a href={`/quiz/${quiz.id}`} className="btn-outline flex-1 text-sm py-2">
                     编辑
                   </a>
-                  <a href={`/quiz/${quiz.id}/flashcard`} className="flex-1 text-center py-2 border border-accent/30 text-accent rounded-lg hover:bg-accent/10 text-sm font-medium transition-all">
+                  <a href={`/quiz/${quiz.id}/flashcard`} className="flex-1 text-sm py-2 border border-accent/30 text-accent rounded-lg hover:bg-accent/10 font-medium transition-all inline-flex items-center justify-center gap-1.5">
                     背题
                   </a>
-                  <a href={`/quiz/${quiz.id}/take`} className="flex-1 text-center py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover text-sm font-medium transition-all">
+                  <a href={`/quiz/${quiz.id}/take`} className="flex-1 text-sm py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover font-medium transition-all inline-flex items-center justify-center gap-1.5">
                     答题
                   </a>
                 </div>

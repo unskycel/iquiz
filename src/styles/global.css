@@ -103,11 +103,11 @@
 }
 
 @keyframes slideUp {
-  from { 
+  from {
     opacity: 0;
     transform: translateY(12px);
   }
-  to { 
+  to {
     opacity: 1;
     transform: translateY(0);
   }
@@ -166,27 +166,27 @@
   .card {
     @apply bg-background border border-border rounded-xl shadow-sm transition-all duration-200;
   }
-  
+
   .card-hover {
     @apply hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5;
   }
 
   .btn-primary {
-    @apply bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium 
+    @apply inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium
            transition-all duration-150 hover:bg-primary-hover
-           active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 
+           active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium
+    @apply inline-flex items-center justify-center gap-1.5 bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium
            transition-all duration-150 hover:bg-muted
            active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-ring focus-visible:ring-offset-2;
   }
 
   .btn-outline {
-    @apply border border-border px-4 py-2 rounded-lg font-medium
+    @apply inline-flex items-center justify-center gap-1.5 border border-border px-4 py-2 rounded-lg font-medium
            transition-all duration-150 hover:bg-accent/10 hover:border-accent/30
            active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-ring focus-visible:ring-offset-2;
