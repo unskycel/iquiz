@@ -226,7 +226,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
                 {currentQuestion.question_options.map((option, idx) => (
                   <div
                     key={option.id}
-                    className="flex items-center justify-center p-3 border border-border rounded-xl bg-muted/30 gap-3"
+                    className="flex items-center justify-start p-3 border border-border rounded-xl bg-muted/30 gap-3 text-left"
                   >
                     <span className="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 font-semibold text-sm bg-muted text-muted-foreground">
                       {String.fromCharCode(65 + idx)}
