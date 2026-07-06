@@ -1,0 +1,8 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { ProgressOverview } from '../components/react/ProgressOverview';
+---
+
+<MainLayout title="iQuiz - 学习进度">
+  <ProgressOverview client:load />
+</MainLayout>

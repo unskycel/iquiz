@@ -74,6 +74,12 @@ export function Navbar() {
       <a href="/dashboard" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
         控制台
       </a>
+      <a href="/progress" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
+        学习进度
+      </a>
+      <a href="/history" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
+        答题历史
+      </a>
       <span className="hidden md:block px-3 py-2 text-sm text-muted-foreground/80 max-w-[180px] truncate">{user.email}</span>
       <button
         onClick={handleLogout}

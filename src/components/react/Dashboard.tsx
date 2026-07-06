@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Quiz, QuizAttempt } from '../../types';
 import { getAccessToken } from '../../lib/auth-client';
 import { ErrorRetry } from './ErrorRetry';
+import { ProgressStats } from './ProgressStats';
 
 interface DashboardProps {
   userId: string;
@@ -157,6 +158,9 @@ export function Dashboard({ userId }: DashboardProps) {
           </div>
         ))}
       </div>
+
+      {/* Learning Progress Overview */}
+      <ProgressStats />
 
       {/* Quizzes */}
       <div>
