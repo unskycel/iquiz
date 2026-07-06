@@ -158,7 +158,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             </p>
           </div>
           <a
-            href={`/quiz/${quizId}`}
+            href="/dashboard"
             className="btn-outline text-sm"
           >
             退出
