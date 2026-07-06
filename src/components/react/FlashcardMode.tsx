@@ -203,6 +203,42 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             <p className="text-xl md:text-2xl font-medium leading-relaxed mb-6">
               {currentQuestion.content}
             </p>
+            
+            {/* 选择题选项 */}
+            {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') && currentQuestion.question_options && currentQuestion.question_options.length > 0 && (
+              <div className="space-y-2.5 mb-6 text-left">
+                {currentQuestion.question_options.map((option, idx) => (
+                  <div
+                    key={option.id}
+                    className="flex items-center p-3 border border-border rounded-xl bg-muted/30"
+                  >
+                    <span className="w-7 h-7 flex items-center justify-center rounded-lg mr-3 flex-shrink-0 font-semibold text-sm bg-muted text-muted-foreground">
+                      {String.fromCharCode(65 + idx)}
+                    </span>
+                    <span className="text-foreground">{option.content}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* 判断题选项 */}
+            {currentQuestion.type === 'true_false' && (
+              <div className="flex gap-3 mb-6">
+                <div className="flex-1 p-4 border border-border rounded-xl bg-muted/30 text-center">
+                  <svg className="w-6 h-6 mx-auto mb-1 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  </svg>
+                  <span className="text-sm text-muted-foreground">正确</span>
+                </div>
+                <div className="flex-1 p-4 border border-border rounded-xl bg-muted/30 text-center">
+                  <svg className="w-6 h-6 mx-auto mb-1 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span className="text-sm text-muted-foreground">错误</span>
+                </div>
+              </div>
+            )}
+            
             <p className="text-muted-foreground/60 text-sm flex items-center justify-center gap-1.5">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
