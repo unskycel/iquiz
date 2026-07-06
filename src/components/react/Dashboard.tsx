@@ -161,6 +161,17 @@ export function Dashboard({ userId }: DashboardProps) {
 
       {/* Quick Actions */}
       <div className="flex flex-wrap gap-3">
+        <a href="/quizzes" className="card flex items-center gap-2.5 px-4 py-3 hover:border-primary/30 transition-colors group">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
+            </svg>
+          </div>
+          <div>
+            <div className="text-sm font-medium">我的习题</div>
+            <div className="text-xs text-muted-foreground">管理所有习题</div>
+          </div>
+        </a>
         <a href="/wrong-answers" className="card flex items-center gap-2.5 px-4 py-3 hover:border-primary/30 transition-colors group">
           <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center">
             <svg className="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -197,53 +208,47 @@ export function Dashboard({ userId }: DashboardProps) {
       </div>
       <ProgressStats />
 
-      {/* Quizzes */}
+      {/* Quizzes Overview */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">我的习题</h2>
-          <a href="/quiz/create" className="btn-primary text-sm">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            创建新习题
+          <a href="/quizzes" className="text-sm text-primary hover:text-primary-hover transition-colors">
+            查看全部 →
           </a>
         </div>
 
         {quizzes.length === 0 ? (
-          <div className="card p-12 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
+          <div className="card p-8 text-center">
+            <p className="text-muted-foreground mb-3">还没有创建任何习题</p>
+            <a href="/quiz/create" className="btn-primary text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
-            </div>
-            <p className="text-muted-foreground mb-2">还没有创建任何习题</p>
-            <p className="text-muted-foreground/60 text-sm">点击上方按钮创建你的第一套习题</p>
+              创建第一套习题
+            </a>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {quizzes.map((quiz, i) => (
-              <div key={quiz.id} className="card card-hover p-6 animate-slide-up" style={{animationDelay: `${i * 0.05}s`}}>
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-base leading-tight">{quiz.title}</h3>
-                  <span className={`badge flex-shrink-0 ml-2 ${quiz.is_published ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {quizzes.slice(0, 3).map((quiz) => (
+              <div key={quiz.id} className="card card-hover p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-sm leading-tight flex-1 min-w-0">{quiz.title}</h3>
+                  <span className={`badge flex-shrink-0 ml-2 text-xs ${quiz.is_published ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
                     {quiz.is_published ? '已发布' : '草稿'}
                   </span>
                 </div>
                 {quiz.description && (
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">{quiz.description}</p>
+                  <p className="text-muted-foreground text-xs mb-3 line-clamp-1">{quiz.description}</p>
                 )}
-                <div className="text-xs text-muted-foreground/80 mb-4">
-                  {formatDate(quiz.created_at)}
-                </div>
-                <div className="flex gap-2">
-                  <a href={`/quiz/${quiz.id}`} className="btn-outline flex-1 text-sm py-2">
-                    编辑
+                <div className="flex gap-1.5">
+                  <a href={`/quiz/${quiz.id}/take`} className="flex-1 text-xs py-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary-hover font-medium text-center transition-colors">
+                    答题
                   </a>
-                  <a href={`/quiz/${quiz.id}/flashcard`} className="flex-1 text-sm py-2 border border-accent/30 text-accent rounded-lg hover:bg-accent/10 font-medium transition-all inline-flex items-center justify-center gap-1.5">
+                  <a href={`/quiz/${quiz.id}/flashcard`} className="flex-1 text-xs py-1.5 border border-accent/30 text-accent rounded-md hover:bg-accent/10 font-medium text-center transition-colors">
                     背题
                   </a>
-                  <a href={`/quiz/${quiz.id}/take`} className="flex-1 text-sm py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover font-medium transition-all inline-flex items-center justify-center gap-1.5">
-                    答题
+                  <a href={`/quiz/${quiz.id}`} className="flex-1 text-xs py-1.5 border border-border rounded-md hover:bg-muted text-muted-foreground font-medium text-center transition-colors">
+                    编辑
                   </a>
                 </div>
               </div>

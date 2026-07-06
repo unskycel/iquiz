@@ -1,0 +1,10 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { QuizList } from '../components/react/QuizList';
+
+const title = '我的习题 - iQuiz';
+---
+
+<MainLayout title={title}>
+  <QuizList client:load userId={Astro.locals.user?.id || ''} />
+</MainLayout>

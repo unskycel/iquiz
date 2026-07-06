@@ -79,6 +79,9 @@ export function Navbar() {
       <a href="/dashboard" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
         控制台
       </a>
+      <a href="/quizzes" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
+        我的习题
+      </a>
       <a href="/progress" className={`${navLinkClass} text-muted-foreground hover:text-primary hover:bg-primary-light`} onClick={() => setMobileMenuOpen(false)}>
         学习进度
       </a>
