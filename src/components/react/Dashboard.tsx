@@ -38,24 +38,19 @@ export function Dashboard({ userId }: DashboardProps) {
         'Authorization': `Bearer ${accessToken}`,
       };
 
-      // Load quizzes
       let quizData: Quiz[] = [];
       const quizzesResponse = await fetch('/api/quizzes?limit=100', { headers });
       if (quizzesResponse.ok) {
         const data = await quizzesResponse.json();
         quizData = data.quizzes || [];
         setQuizzes(quizData);
-      } else {
-        console.error('[Dashboard] /api/quizzes error:', quizzesResponse.status);
       }
 
-      // Load attempts
       const attemptsResponse = await fetch('/api/attempts/history?limit=10', { headers });
       if (attemptsResponse.ok) {
         const { attempts: attemptData } = await attemptsResponse.json();
         setAttempts(attemptData || []);
 
-        // Calculate stats
         const completedAttempts = (attemptData || []).filter((a: any) => a.completed_at);
         const totalScore = completedAttempts.reduce((sum: number, a: any) => sum + (a.score || 0), 0);
         const totalPoints = completedAttempts.reduce((sum: number, a: any) => sum + a.total_points, 0);
@@ -65,10 +60,8 @@ export function Dashboard({ userId }: DashboardProps) {
           totalQuizzes: quizData?.length || 0,
           completedAttempts: completedAttempts.length,
           averageScore: totalPoints > 0 ? Math.round((totalScore / totalPoints) * 100) : 0,
-          totalTime: Math.round(totalTime / 60), // Convert to minutes
+          totalTime: Math.round(totalTime / 60),
         });
-      } else {
-        console.error('[Dashboard] /api/attempts error:', attemptsResponse.status);
       }
     } catch (err) {
       console.error('Error loading dashboard data:', err);
@@ -95,29 +88,27 @@ export function Dashboard({ userId }: DashboardProps) {
   if (loading) {
     return (
       <div className="space-y-8 animate-fade-in">
-        {/* Stats skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-background border border-border rounded-lg shadow-sm p-6">
-              <div className="h-8 w-16 bg-muted rounded animate-pulse mb-2" />
-              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+            <div key={i} className="card p-6">
+              <div className="h-8 w-16 skeleton rounded-lg mb-2" />
+              <div className="h-4 w-20 skeleton rounded" />
             </div>
           ))}
         </div>
-        {/* Quiz cards skeleton */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <div className="h-7 w-24 bg-muted rounded animate-pulse" />
-            <div className="h-10 w-28 bg-muted rounded animate-pulse" />
+            <div className="h-7 w-24 skeleton rounded-lg" />
+            <div className="h-10 w-28 skeleton rounded-lg" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-background border border-border rounded-lg shadow-sm p-6">
-                <div className="h-6 w-3/4 bg-muted rounded animate-pulse mb-3" />
-                <div className="h-4 w-full bg-muted rounded animate-pulse mb-4" />
+              <div key={i} className="card p-6">
+                <div className="h-6 w-3/4 skeleton rounded mb-3" />
+                <div className="h-4 w-full skeleton rounded mb-4" />
                 <div className="flex space-x-2">
-                  <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
-                  <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
+                  <div className="h-9 flex-1 skeleton rounded-lg" />
+                  <div className="h-9 flex-1 skeleton rounded-lg" />
                 </div>
               </div>
             ))}
@@ -131,76 +122,89 @@ export function Dashboard({ userId }: DashboardProps) {
     return <ErrorRetry message={error} onRetry={loadData} fullPage />;
   }
 
+  const statCards = [
+    { label: '习题总数', value: stats.totalQuizzes, color: 'text-primary', bg: 'bg-primary-light', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+    )},
+    { label: '已完成', value: stats.completedAttempts, color: 'text-success', bg: 'bg-success/10', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+    )},
+    { label: '平均分数', value: `${stats.averageScore}%`, color: 'text-warning', bg: 'bg-warning/10', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+    )},
+    { label: '学习时长', value: `${stats.totalTime}分钟`, color: 'text-accent', bg: 'bg-accent/10', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+    )},
+  ];
+
   return (
     <div className="space-y-8">
+      {/* Page Header */}
+      <div className="animate-slide-up">
+        <h1 className="text-2xl font-bold tracking-tight">控制台</h1>
+        <p className="text-muted-foreground text-sm mt-1">管理你的习题集并查看学习进度</p>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-indigo-600">{stats.totalQuizzes}</div>
-          <div className="text-muted-foreground">习题总数</div>
-        </div>
-        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-green-600">{stats.completedAttempts}</div>
-          <div className="text-muted-foreground">已完成</div>
-        </div>
-        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-yellow-600">{stats.averageScore}%</div>
-          <div className="text-muted-foreground">平均分数</div>
-        </div>
-        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
-          <div className="text-2xl font-bold text-purple-600">{stats.totalTime}分钟</div>
-          <div className="text-muted-foreground">学习时长</div>
-        </div>
+        {statCards.map((stat, i) => (
+          <div key={i} className="card p-5 animate-slide-up" style={{animationDelay: `${i * 0.05}s`}}>
+            <div className={`w-10 h-10 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center mb-3`}>
+              {stat.icon}
+            </div>
+            <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+            <div className="text-muted-foreground text-sm">{stat.label}</div>
+          </div>
+        ))}
       </div>
 
       {/* Quizzes */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">我的习题</h2>
-          <a
-            href="/quiz/create"
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
-          >
+          <h2 className="text-lg font-semibold">我的习题</h2>
+          <a href="/quiz/create" className="btn-primary text-sm inline-flex items-center gap-1.5">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
             创建新习题
           </a>
         </div>
 
         {quizzes.length === 0 ? (
-          <div className="bg-background border border-border rounded-lg shadow-sm p-8 text-center text-muted-foreground">
-            还没有创建任何习题
+          <div className="card p-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
+              </svg>
+            </div>
+            <p className="text-muted-foreground mb-2">还没有创建任何习题</p>
+            <p className="text-muted-foreground/60 text-sm">点击上方按钮创建你的第一套习题</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {quizzes.map((quiz) => (
-              <div key={quiz.id} className="bg-background border border-border rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-lg mb-2">{quiz.title}</h3>
-                {quiz.description && (
-                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{quiz.description}</p>
-                )}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{formatDate(quiz.created_at)}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${quiz.is_published ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-muted text-foreground'}`}>
+            {quizzes.map((quiz, i) => (
+              <div key={quiz.id} className="card card-hover p-6 animate-slide-up" style={{animationDelay: `${i * 0.05}s`}}>
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="font-semibold text-base leading-tight">{quiz.title}</h3>
+                  <span className={`badge flex-shrink-0 ml-2 ${quiz.is_published ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
                     {quiz.is_published ? '已发布' : '草稿'}
                   </span>
                 </div>
-                <div className="mt-4 flex space-x-2">
-                  <a
-                    href={`/quiz/${quiz.id}`}
-                    className="flex-1 text-center py-2 border border-border rounded-lg hover:bg-accent text-sm"
-                  >
+                {quiz.description && (
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">{quiz.description}</p>
+                )}
+                <div className="text-xs text-muted-foreground/80 mb-4">
+                  {formatDate(quiz.created_at)}
+                </div>
+                <div className="flex gap-2">
+                  <a href={`/quiz/${quiz.id}`} className="flex-1 text-center py-2 border border-border rounded-lg hover:bg-accent/10 hover:border-accent/30 text-sm font-medium transition-all">
                     编辑
                   </a>
-                  <a
-                    href={`/quiz/${quiz.id}/flashcard`}
-                    className="flex-1 text-center py-2 border border-teal-400 text-teal-600 rounded-lg hover:bg-teal-50 text-sm"
-                  >
+                  <a href={`/quiz/${quiz.id}/flashcard`} className="flex-1 text-center py-2 border border-accent/30 text-accent rounded-lg hover:bg-accent/10 text-sm font-medium transition-all">
                     背题
                   </a>
-                  <a
-                    href={`/quiz/${quiz.id}/take`}
-                    className="flex-1 text-center py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 text-sm"
-                  >
-                    开始答题
+                  <a href={`/quiz/${quiz.id}/take`} className="flex-1 text-center py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary-hover text-sm font-medium transition-all">
+                    答题
                   </a>
                 </div>
               </div>
@@ -211,45 +215,56 @@ export function Dashboard({ userId }: DashboardProps) {
 
       {/* Recent Attempts */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">最近答题记录</h2>
+        <h2 className="text-lg font-semibold mb-4">最近答题记录</h2>
         {attempts.length === 0 ? (
-          <div className="bg-background border border-border rounded-lg shadow-sm p-8 text-center text-muted-foreground">
-            还没有答题记录
+          <div className="card p-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <p className="text-muted-foreground mb-1">还没有答题记录</p>
+            <p className="text-muted-foreground/60 text-sm">完成一次答题后这里会显示记录</p>
           </div>
         ) : (
-          <div className="bg-background border border-border rounded-lg shadow-sm overflow-x-auto">
-            <table className="w-full min-w-[500px]">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">习题</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">分数</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">用时</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">日期</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {attempts.map((attempt) => (
-                  <tr key={attempt.id} className="hover:bg-accent">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <a href={`/quiz/attempts/${attempt.id}`} className="text-indigo-600 hover:text-indigo-700">
-                        {attempt.quizzes.title}
-                      </a>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`font-medium ${attempt.score && attempt.score / attempt.total_points >= 0.6 ? 'text-green-600' : 'text-red-600'}`}>
-                        {attempt.score || 0}/{attempt.total_points}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
-                      {formatTime(attempt.time_taken)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
-                      {attempt.completed_at ? formatDate(attempt.completed_at) : '-'}
-                    </td>
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[500px]">
+                <thead className="bg-muted/50 border-b border-border">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">习题</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">分数</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">用时</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">日期</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {attempts.map((attempt) => {
+                    const passRate = attempt.score && attempt.total_points ? attempt.score / attempt.total_points : 0;
+                    return (
+                      <tr key={attempt.id} className="hover:bg-accent/5 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <a href={`/quiz/attempts/${attempt.id}`} className="text-primary hover:text-primary-hover font-medium transition-colors">
+                            {attempt.quizzes.title}
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`font-semibold ${passRate >= 0.6 ? 'text-success' : 'text-destructive'}`}>
+                            {attempt.score || 0}/{attempt.total_points}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-muted-foreground text-sm">
+                          {formatTime(attempt.time_taken)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-muted-foreground text-sm">
+                          {attempt.completed_at ? formatDate(attempt.completed_at) : '-'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

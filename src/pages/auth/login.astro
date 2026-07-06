@@ -3,31 +3,37 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
 ---
 
 <AuthLayout title="iQuiz - 登录">
-  <h2 class="text-2xl font-bold text-center mb-6">登录</h2>
+  <h2 class="text-2xl font-bold text-center mb-1">欢迎回来</h2>
+  <p class="text-muted-foreground text-center text-sm mb-6">登录你的 iQuiz 账号</p>
   
-  <div id="error-msg" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm"></div>
+  <div id="error-msg" class="hidden mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm flex items-center gap-2">
+    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+    </svg>
+    <span id="error-text"></span>
+  </div>
   
   <form id="login-form" class="space-y-4">
     <div>
-      <label for="email" class="block text-sm font-medium text-foreground mb-1">邮箱</label>
+      <label for="email" class="block text-sm font-medium text-foreground mb-1.5">邮箱</label>
       <input
         type="email"
         id="email"
         name="email"
         required
-        class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-background text-foreground"
+        class="input-field"
         placeholder="your@email.com"
       />
     </div>
     
     <div>
-      <label for="password" class="block text-sm font-medium text-foreground mb-1">密码</label>
+      <label for="password" class="block text-sm font-medium text-foreground mb-1.5">密码</label>
       <input
         type="password"
         id="password"
         name="password"
         required
-        class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-background text-foreground"
+        class="input-field"
         placeholder="••••••••"
       />
     </div>
@@ -35,16 +41,16 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
     <button
       type="submit"
       id="submit-btn"
-      class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
+      class="btn-primary w-full py-2.5 text-base inline-flex items-center justify-center gap-2"
     >
-      登录
+      <span id="submit-text">登录</span>
     </button>
   </form>
   
   <div class="mt-6 text-center">
-    <p class="text-muted-foreground">
+    <p class="text-muted-foreground text-sm">
       还没有账号？
-      <a href="/auth/register" class="text-primary hover:opacity-80 font-medium">立即注册</a>
+      <a href="/auth/register" class="text-primary hover:text-primary-hover font-medium transition-colors">立即注册</a>
     </p>
   </div>
 </AuthLayout>
@@ -59,7 +65,9 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
   
   const form = document.getElementById('login-form') as HTMLFormElement;
   const errorMsg = document.getElementById('error-msg')!;
+  const errorText = document.getElementById('error-text')!;
   const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const submitText = document.getElementById('submit-text')!;
   
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -69,7 +77,7 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
     
     submitBtn.disabled = true;
-    submitBtn.textContent = '登录中...';
+    submitText.textContent = '登录中...';
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -78,18 +86,18 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
       });
       
       if (error) {
-        errorMsg.textContent = error.message;
+        errorText.textContent = error.message;
         errorMsg.classList.remove('hidden');
         return;
       }
       
       window.location.href = '/dashboard';
     } catch (err) {
-      errorMsg.textContent = '登录失败，请重试';
+      errorText.textContent = '登录失败，请重试';
       errorMsg.classList.remove('hidden');
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = '登录';
+      submitText.textContent = '登录';
     }
   });
 </script>

@@ -18,6 +18,9 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <title>{title}</title>
     <script is:inline>
       (function() {
@@ -29,12 +32,17 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     </script>
   </head>
   <body class="min-h-screen flex flex-col bg-background text-foreground">
-    <nav class="bg-background border-b border-border shadow-sm relative">
+    <nav class="sticky top-0 z-50 glass border-b border-border/40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <a href="/" class="flex items-center space-x-2">
-              <span class="text-xl font-bold text-primary">iQuiz</span>
+            <a href="/" class="flex items-center space-x-2.5 group">
+              <div class="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-soft transition-transform group-hover:scale-105">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+              </div>
+              <span class="text-lg font-bold tracking-tight">iQuiz</span>
             </a>
           </div>
           <Navbar client:load />
@@ -44,19 +52,26 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
       <slot />
     </main>
-    <div id="offline-banner" class="hidden fixed bottom-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 text-sm z-50">
-      当前处于离线状态，部分功能可能不可用
+    <div id="offline-banner" class="hidden fixed bottom-0 left-0 right-0 bg-warning text-warning-foreground text-center py-2 text-sm z-50 shadow-large">
+      <span class="inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        当前处于离线状态，部分功能可能不可用
+      </span>
     </div>
-    <footer class="bg-background border-t border-border mt-auto">
+    <footer class="border-t border-border/50 mt-auto">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <p class="text-center text-muted-foreground text-sm">© 2026 unsky 保留所有权利</p>
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p class="text-muted-foreground text-sm">© 2026 unsky 保留所有权利</p>
+          <p class="text-muted-foreground/60 text-xs">Built with Astro + React</p>
+        </div>
       </div>
     </footer>
   </body>
 </html>
 
 <script>
-  // Online/offline detection
   const banner = document.getElementById('offline-banner');
   function updateOnlineStatus() {
     if (navigator.onLine) {

@@ -1,57 +1,89 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import { TestComponent } from '../components/react/TestComponent';
 ---
 
 <MainLayout title="iQuiz - 你的资料习题">
-  <div class="text-center py-12 md:py-16 px-4">
-    <h1 class="text-3xl md:text-4xl font-bold text-foreground mb-4 md:mb-6">iQuiz - 你的资料习题</h1>
-    <p class="text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 max-w-2xl mx-auto">
-      快速将你的学习资料转化为各类习题，帮助你更快地学习和记忆。
+  <!-- Hero Section -->
+  <section class="relative text-center py-16 md:py-24 px-4">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-light text-primary text-sm font-medium mb-6 animate-scale-in">
+      <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+      全新学习体验 · 现在开始
+    </div>
+    <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-5 md:mb-6 animate-slide-up">
+      让每一道题<br class="md:hidden" />
+      <span class="gradient-text">成为进步的阶梯</span>
+    </h1>
+    <p class="text-lg md:text-xl text-muted-foreground mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-up" style="animation-delay: 0.1s;">
+      快速将你的学习资料转化为各类习题，支持单选、多选、判断、填空、简答五种题型，帮助你更高效地学习和记忆。
     </p>
-    <div class="flex flex-col sm:flex-row justify-center gap-3 sm:space-x-4">
-      <a href="/auth/register" class="bg-primary text-primary-foreground px-8 py-3 rounded-lg text-lg font-semibold hover:opacity-90 transition-opacity">
-        开始使用
+    <div class="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 animate-slide-up" style="animation-delay: 0.2s;">
+      <a href="/auth/register" class="btn-primary px-8 py-3 text-base inline-flex items-center justify-center gap-2">
+        免费开始使用
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+        </svg>
       </a>
-      <a href="/auth/login" class="border border-primary text-primary px-8 py-3 rounded-lg text-lg font-semibold hover:bg-accent transition-colors">
-        登录
+      <a href="/auth/login" class="btn-outline px-8 py-3 text-base inline-flex items-center justify-center">
+        登录账号
       </a>
     </div>
-  </div>
+  </section>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-8 md:mt-16">
-    <div class="text-center p-6">
-      <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+  <!-- Features Grid -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-8 md:mt-16">
+    <div class="card card-hover p-7 animate-slide-up" style="animation-delay: 0.3s;">
+      <div class="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center mb-5">
+        <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
         </svg>
       </div>
-      <h3 class="text-xl font-semibold mb-2">多题型支持</h3>
-      <p class="text-muted-foreground">支持单选、多选、判断、填空、问答等多种题型</p>
+      <h3 class="text-lg font-semibold mb-2">五种题型支持</h3>
+      <p class="text-muted-foreground text-sm leading-relaxed">单选、多选、判断、填空、简答，全面覆盖你的学习需求</p>
     </div>
 
-    <div class="text-center p-6">
-      <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+    <div class="card card-hover p-7 animate-slide-up" style="animation-delay: 0.4s;">
+      <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+        <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7Z" />
         </svg>
       </div>
-      <h3 class="text-xl font-semibold mb-2">快速生成</h3>
-      <p class="text-muted-foreground">一键生成习题，快速巩固你的知识点</p>
+      <h3 class="text-lg font-semibold mb-2">高效背题模式</h3>
+      <p class="text-muted-foreground text-sm leading-relaxed">闪卡式背诵体验，支持滑动切换，随时查看答案和解析</p>
     </div>
 
-    <div class="text-center p-6">
-      <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    <div class="card card-hover p-7 animate-slide-up" style="animation-delay: 0.5s;">
+      <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-5">
+        <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
       </div>
-      <h3 class="text-xl font-semibold mb-2">快速导出</h3>
-      <p class="text-muted-foreground">将习题导出为PDF，方便分享和打印</p>
+      <h3 class="text-lg font-semibold mb-2">自动评分统计</h3>
+      <p class="text-muted-foreground text-sm leading-relaxed">答题后即时评分，历史记录追踪，可视化你的学习进度</p>
     </div>
-  </div>
+  </section>
 
-  <div class="mt-8">
-    <TestComponent client:load />
-  </div>
+  <!-- Stats Banner -->
+  <section class="mt-12 md:mt-20 mb-8">
+    <div class="card p-8 md:p-12 bg-gradient-surface relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+      <div class="relative grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div>
+          <div class="text-3xl md:text-4xl font-bold gradient-text mb-1">5</div>
+          <div class="text-muted-foreground text-sm">题型支持</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold gradient-text mb-1">∞</div>
+          <div class="text-muted-foreground text-sm">题目数量</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold gradient-text mb-1">PDF</div>
+          <div class="text-muted-foreground text-sm">导出格式</div>
+        </div>
+        <div>
+          <div class="text-3xl md:text-4xl font-bold gradient-text mb-1">100%</div>
+          <div class="text-muted-foreground text-sm">免费使用</div>
+        </div>
+      </div>
+    </div>
+  </section>
 </MainLayout>

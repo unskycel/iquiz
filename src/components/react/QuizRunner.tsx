@@ -25,14 +25,12 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Load quiz data if quizId is provided
   useEffect(() => {
     if (quizId && !initialQuiz) {
       loadQuiz();
     }
   }, [quizId]);
 
-  // Timer — must be before any early returns (React hooks rule)
   useEffect(() => {
     if (loading || error || !quiz || questions.length === 0) return;
     const timer = setInterval(() => {
@@ -66,23 +64,28 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
   if (loading) {
     return (
-      <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 bg-primary mx-auto"></div>
-        <p className="mt-2 text-muted-foreground">加载中...</p>
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-10 h-10 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        <p className="text-muted-foreground text-sm">加载中...</p>
       </div>
     );
   }
 
   if (error || !quiz) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-600">{error || '习题不存在'}</p>
+      <div className="text-center py-20">
+        <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+          </svg>
+        </div>
+        <p className="text-destructive mb-4">{error || '习题不存在'}</p>
         <button
           onClick={() => {
             if (typeof onCancel === 'function') onCancel();
             else window.location.href = '/dashboard';
           }}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
+          className="btn-primary"
         >
           返回
         </button>
@@ -92,14 +95,19 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
   if (questions.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">该习题还没有题目</p>
+      <div className="text-center py-20">
+        <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
+          </svg>
+        </div>
+        <p className="text-muted-foreground mb-4">该习题还没有题目</p>
         <button
           onClick={() => {
             if (typeof onCancel === 'function') onCancel();
             else window.location.href = '/dashboard';
           }}
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
+          className="btn-primary"
         >
           返回
         </button>
@@ -132,7 +140,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      // Create attempt via API
       const response = await fetch('/api/attempts', {
         method: 'POST',
         headers: {
@@ -147,7 +154,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       }
       const { attempt } = await response.json();
 
-      // Submit all answers
       for (const [questionId, answer] of answers.entries()) {
         const r = await fetch(`/api/attempts/${attempt.id}/answer`, {
           method: 'PUT',
@@ -163,7 +169,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         }
       }
 
-      // Complete the attempt
       const completeResponse = await fetch(`/api/attempts/${attempt.id}/complete`, {
         method: 'POST',
         headers: {
@@ -181,8 +186,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       if (typeof onComplete === 'function') {
         onComplete(completedAttempt, answers);
       } else {
-        // Astro client:load does not serialize function props.
-        // Fall back to direct navigation using the returned attempt id.
         window.location.href = `/quiz/attempts/${completedAttempt.id}`;
       }
     } catch (error: any) {
@@ -199,12 +202,6 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  /**
-   * Get the number of blanks for a fill_blank question.
-   * - Array → return length (DB stores multi-blank answers as JS array)
-   * - String starting with '[' → JSON.parse and return length
-   * - Otherwise → 1 (single blank)
-   */
   const getBlankCount = (correctAnswer: string | string[]): number => {
     if (Array.isArray(correctAnswer)) {
       return correctAnswer.length;
@@ -226,81 +223,97 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     switch (currentQuestion.type) {
       case 'single_choice':
         return (
-          <div className="space-y-3">
-            {currentQuestion.question_options?.map((option, idx) => (
-              <label
-                key={option.id}
-                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                  currentAnswer === option.content
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-4 flex-shrink-0 font-semibold text-sm ${
-                  currentAnswer === option.content
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}>
-                  {String.fromCharCode(65 + idx)}
-                </span>
-                <input
-                  type="radio"
-                  name={`question-${currentQuestion.id}`}
-                  checked={currentAnswer === option.content}
-                  onChange={() => handleAnswerChange(option.content)}
-                  className="sr-only"
-                />
-                {option.content}
-              </label>
-            ))}
+          <div className="space-y-2.5">
+            {currentQuestion.question_options?.map((option, idx) => {
+              const isSelected = currentAnswer === option.content;
+              return (
+                <label
+                  key={option.id}
+                  className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                    isSelected
+                      ? 'border-primary bg-primary-light shadow-glow'
+                      : 'border-border hover:border-primary/40 hover:bg-accent/5'
+                  }`}
+                >
+                  <span className={`w-8 h-8 flex items-center justify-center rounded-lg mr-4 flex-shrink-0 font-semibold text-sm transition-all ${
+                    isSelected
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {String.fromCharCode(65 + idx)}
+                  </span>
+                  <input
+                    type="radio"
+                    name={`question-${currentQuestion.id}`}
+                    checked={isSelected}
+                    onChange={() => handleAnswerChange(option.content)}
+                    className="sr-only"
+                  />
+                  <span className="text-foreground">{option.content}</span>
+                  {isSelected && (
+                    <svg className="w-5 h-5 text-primary ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                  )}
+                </label>
+              );
+            })}
           </div>
         );
 
       case 'multiple_choice':
         const selectedOptions = (currentAnswer as string[]) || [];
         return (
-          <div className="space-y-3">
-            {currentQuestion.question_options?.map((option, idx) => (
-              <label
-                key={option.id}
-                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                  selectedOptions.includes(option.content)
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-4 flex-shrink-0 font-semibold text-sm ${
-                  selectedOptions.includes(option.content)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}>
-                  {String.fromCharCode(65 + idx)}
-                </span>
-                <input
-                  type="checkbox"
-                  checked={selectedOptions.includes(option.content)}
-                  onChange={() => {
-                    const newSelected = selectedOptions.includes(option.content)
-                      ? selectedOptions.filter((s) => s !== option.content)
-                      : [...selectedOptions, option.content];
-                    handleAnswerChange(newSelected);
-                  }}
-                  className="sr-only"
-                />
-                {option.content}
-              </label>
-            ))}
+          <div className="space-y-2.5">
+            {currentQuestion.question_options?.map((option, idx) => {
+              const isSelected = selectedOptions.includes(option.content);
+              return (
+                <label
+                  key={option.id}
+                  className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                    isSelected
+                      ? 'border-primary bg-primary-light shadow-glow'
+                      : 'border-border hover:border-primary/40 hover:bg-accent/5'
+                  }`}
+                >
+                  <span className={`w-8 h-8 flex items-center justify-center rounded-lg mr-4 flex-shrink-0 font-semibold text-sm transition-all ${
+                    isSelected
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {String.fromCharCode(65 + idx)}
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => {
+                      const newSelected = isSelected
+                        ? selectedOptions.filter((s) => s !== option.content)
+                        : [...selectedOptions, option.content];
+                      handleAnswerChange(newSelected);
+                    }}
+                    className="sr-only"
+                  />
+                  <span className="text-foreground">{option.content}</span>
+                  {isSelected && (
+                    <svg className="w-5 h-5 text-primary ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                  )}
+                </label>
+              );
+            })}
           </div>
         );
 
       case 'true_false':
         return (
-          <div className="flex space-x-4">
+          <div className="flex gap-4">
             <label
-              className={`flex-1 p-4 border rounded-lg cursor-pointer text-center transition-colors ${
+              className={`flex-1 p-6 border rounded-xl cursor-pointer text-center transition-all duration-200 ${
                 currentAnswer === 'true'
-                  ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-border hover:border-primary/50'
+                  ? 'border-success bg-success/10 shadow-glow'
+                  : 'border-border hover:border-success/40 hover:bg-success/5'
               }`}
             >
               <input
@@ -310,13 +323,18 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                 onChange={() => handleAnswerChange('true')}
                 className="sr-only"
               />
-              正确
+              <div className="flex flex-col items-center gap-2">
+                <svg className={`w-8 h-8 ${currentAnswer === 'true' ? 'text-success' : 'text-muted-foreground'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                <span className={`font-medium ${currentAnswer === 'true' ? 'text-success' : 'text-muted-foreground'}`}>正确</span>
+              </div>
             </label>
             <label
-              className={`flex-1 p-4 border rounded-lg cursor-pointer text-center transition-colors ${
+              className={`flex-1 p-6 border rounded-xl cursor-pointer text-center transition-all duration-200 ${
                 currentAnswer === 'false'
-                  ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-border hover:border-primary/50'
+                  ? 'border-destructive bg-destructive/10 shadow-glow'
+                  : 'border-border hover:border-destructive/40 hover:bg-destructive/5'
               }`}
             >
               <input
@@ -326,7 +344,12 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                 onChange={() => handleAnswerChange('false')}
                 className="sr-only"
               />
-              错误
+              <div className="flex flex-col items-center gap-2">
+                <svg className={`w-8 h-8 ${currentAnswer === 'false' ? 'text-destructive' : 'text-muted-foreground'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span className={`font-medium ${currentAnswer === 'false' ? 'text-destructive' : 'text-muted-foreground'}`}>错误</span>
+              </div>
             </label>
           </div>
         );
@@ -334,13 +357,12 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       case 'fill_blank':
         const blankCount = getBlankCount(currentQuestion.correct_answer);
         if (blankCount > 1) {
-          // Multi-blank fill-in
           const blankAnswers = (currentAnswer as string[]) || new Array(blankCount).fill('');
           return (
             <div className="space-y-3">
               {Array.from({ length: blankCount }, (_, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-muted-foreground w-10 flex-shrink-0">
+                  <span className="text-sm font-medium text-muted-foreground w-12 flex-shrink-0">
                     空{i + 1}
                   </span>
                   <input
@@ -351,21 +373,20 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                       newAnswers[i] = e.target.value;
                       handleAnswerChange(newAnswers);
                     }}
-                    className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                    placeholder={`输入第 ${i + 1} 个空`}
+                    className="input-field"
+                    placeholder={`输入第 ${i + 1} 个空的答案`}
                   />
                 </div>
               ))}
             </div>
           );
         }
-        // Single blank
         return (
           <input
             type="text"
             value={(currentAnswer as string) || ''}
             onChange={(e) => handleAnswerChange(e.target.value)}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            className="input-field"
             placeholder="输入答案"
           />
         );
@@ -375,9 +396,9 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
           <textarea
             value={(currentAnswer as string) || ''}
             onChange={(e) => handleAnswerChange(e.target.value)}
-            rows={4}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-            placeholder="输入答案"
+            rows={5}
+            className="input-field resize-none"
+            placeholder="输入你的答案..."
           />
         );
 
@@ -386,38 +407,50 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     }
   };
 
+  const typeLabels: Record<string, { label: string; color: string }> = {
+    single_choice: { label: '单选题', color: 'bg-primary-light text-primary' },
+    multiple_choice: { label: '多选题', color: 'bg-accent/10 text-accent' },
+    true_false: { label: '判断题', color: 'bg-warning/10 text-warning' },
+    fill_blank: { label: '填空题', color: 'bg-success/10 text-success' },
+    short_answer: { label: '简答题', color: 'bg-destructive/10 text-destructive' },
+  };
+
+  const typeInfo = typeLabels[currentQuestion.type] || { label: currentQuestion.type, color: 'bg-muted text-muted-foreground' };
+
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header */}
-      <div className="bg-background border border-border rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <h1 className="text-xl font-semibold">{quiz.title}</h1>
-          <div className="text-muted-foreground">{formatTime(timeElapsed)}</div>
+      <div className="card p-5 mb-5">
+        <div className="flex justify-between items-center mb-3">
+          <h1 className="text-lg font-semibold">{quiz.title}</h1>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <span className="font-mono text-sm tabular-nums">{formatTime(timeElapsed)}</span>
+          </div>
         </div>
         <div className="flex justify-between items-center text-sm text-muted-foreground mb-2">
-          <span>
-            题目 {currentIndex + 1} / {questions.length}
-          </span>
-          <span>
-            已答 {answers.size} / {questions.length}
-          </span>
+          <span>题目 <span className="font-medium text-foreground">{currentIndex + 1}</span> / {questions.length}</span>
+          <span>已答 <span className="font-medium text-foreground">{answers.size}</span> / {questions.length}</span>
         </div>
-        <div className="w-full bg-muted rounded-full h-2">
+        <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
           <div
-            className="bg-primary h-2 rounded-full transition-all"
+            className="bg-gradient-primary h-full rounded-full transition-all duration-300 ease-out-expo"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Question */}
-      <div className="bg-background border border-border rounded-lg shadow-sm p-6 mb-6">
-        <div className="flex items-start space-x-2 mb-4">
-          <span className="font-medium text-lg">{currentIndex + 1}.</span>
-          <div className="flex-1">
-            <p className="text-lg mb-1">{currentQuestion.content}</p>
-            <span className="text-sm text-muted-foreground">({currentQuestion.points}分)</span>
-          </div>
+      <div className="card p-7 mb-5 animate-scale-in" key={currentQuestion.id}>
+        <div className="flex items-center gap-2 mb-4">
+          <span className={`badge ${typeInfo.color}`}>{typeInfo.label}</span>
+          <span className="text-sm text-muted-foreground">{currentQuestion.points} 分</span>
+        </div>
+        <div className="flex items-start gap-2 mb-6">
+          <span className="font-semibold text-lg text-primary flex-shrink-0">{currentIndex + 1}.</span>
+          <p className="text-lg leading-relaxed text-foreground flex-1">{currentQuestion.content}</p>
         </div>
         {renderQuestion()}
       </div>
@@ -427,16 +460,16 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-destructive text-sm font-medium transition-colors px-3 py-2"
         >
           放弃答题
         </button>
-        <div className="flex space-x-3">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="px-4 py-2 border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-outline disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
           >
             上一题
           </button>
@@ -444,7 +477,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             <button
               type="button"
               onClick={handleNext}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
+              className="btn-primary"
             >
               下一题
             </button>
@@ -453,9 +486,21 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              className="px-6 py-2 bg-success text-success-foreground rounded-lg font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 inline-flex items-center gap-2"
             >
-              {isSubmitting ? '提交中...' : '提交答案'}
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  提交中...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  </svg>
+                  提交答案
+                </>
+              )}
             </button>
           )}
         </div>
@@ -463,11 +508,16 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
       {/* Submit error */}
       {submitError && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 dark:bg-red-950 dark:border-red-800 dark:text-red-300 rounded-lg text-sm flex items-center justify-between">
-          <span>{submitError}</span>
+        <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm flex items-center justify-between animate-slide-up">
+          <span className="flex items-center gap-2">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            {submitError}
+          </span>
           <button
             onClick={() => setSubmitError(null)}
-            className="text-red-400 hover:text-red-600 ml-2"
+            className="text-destructive/60 hover:text-destructive ml-2"
           >
             &times;
           </button>
@@ -475,7 +525,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       )}
 
       {/* Question Navigator */}
-      <div className="mt-6 bg-background border border-border rounded-lg shadow-sm p-4">
+      <div className="mt-6 card p-4">
         <h3 className="text-sm font-medium text-foreground mb-3">题目导航</h3>
         <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
           {questions.map((q, index) => (
@@ -483,12 +533,12 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               key={q.id}
               type="button"
               onClick={() => setCurrentIndex(index)}
-              className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200 ${
                 index === currentIndex
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-primary text-primary-foreground shadow-soft scale-105'
                   : answers.has(q.id)
-                  ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
-                  : 'bg-muted text-foreground hover:bg-accent'
+                  ? 'bg-success/15 text-success hover:bg-success/20'
+                  : 'bg-muted text-muted-foreground hover:bg-accent/10 hover:text-foreground'
               }`}
             >
               {index + 1}
