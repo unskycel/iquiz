@@ -164,10 +164,40 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             退出
           </a>
         </div>
-        <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+        <div className="relative w-full h-6 flex items-center group">
+          {/* Track */}
+          <div className="absolute inset-x-0 h-1.5 bg-muted rounded-full overflow-hidden pointer-events-none">
+            <div
+              className="bg-gradient-primary h-full rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          {/* Native range input overlay */}
+          <input
+            type="range"
+            min={1}
+            max={questions.length}
+            value={currentIndex + 1}
+            onChange={(e) => {
+              const idx = Number(e.target.value) - 1;
+              if (idx !== currentIndex) {
+                setIsFlipping(true);
+                setTimeout(() => {
+                  setShowAnswer(false);
+                  setCurrentIndex(idx);
+                  setIsFlipping(false);
+                }, 100);
+              }
+            }}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 p-0"
+            aria-label="拖动跳转到指定题目"
+          />
+          {/* Thumb indicator */}
           <div
-            className="bg-gradient-primary h-full rounded-full transition-all duration-300 ease-out-expo"
-            style={{ width: `${progress}%` }}
+            className="absolute w-4 h-4 rounded-full bg-primary border-2 border-background shadow-md pointer-events-none transition-transform duration-150 group-hover:scale-110"
+            style={{
+              left: `calc(${progress}% - 8px)`,
+            }}
           />
         </div>
       </div>
