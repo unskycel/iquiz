@@ -16,16 +16,25 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <script is:inline>
+      (function() {
+        const stored = localStorage.getItem('theme');
+        if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
-  <body class="min-h-screen flex flex-col bg-gray-50">
-    <nav class="bg-white shadow-sm relative">
+  <body class="min-h-screen flex flex-col bg-background text-foreground">
+    <nav class="bg-background border-b border-border shadow-sm relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
             <a href="/" class="flex items-center space-x-2">
-              <span class="text-xl font-bold text-indigo-600">iQuiz</span>
+              <span class="text-xl font-bold text-primary">iQuiz</span>
             </a>
           </div>
           <Navbar client:load />
@@ -38,9 +47,9 @@ const { title = 'iQuiz - 你的资料习题', description = '快速将你的学�
     <div id="offline-banner" class="hidden fixed bottom-0 left-0 right-0 bg-yellow-500 text-white text-center py-2 text-sm z-50">
       当前处于离线状态，部分功能可能不可用
     </div>
-    <footer class="bg-white border-t mt-auto">
+    <footer class="bg-background border-t border-border mt-auto">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <p class="text-center text-gray-500 text-sm">© 2025 iQuiz 保留所有权利</p>
+        <p class="text-center text-muted-foreground text-sm">© 2026 unsky 保留所有权利</p>
       </div>
     </footer>
   </body>
