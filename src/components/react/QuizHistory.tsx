@@ -13,6 +13,7 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const limit = 10;
 
   useEffect(() => {
@@ -52,9 +53,35 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
     }
   };
 
+  const handleDelete = async (attemptId: string) => {
+    if (!confirm('确定删除这条答题记录吗？此操作不可撤销。')) return;
+
+    setDeletingId(attemptId);
+    try {
+      const token = getAccessToken();
+      if (!token) return;
+
+      const response = await fetch(`/api/attempts/${attemptId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        setAttempts(prev => prev.filter(a => a.id !== attemptId));
+        setTotal(prev => prev - 1);
+      } else {
+        alert('删除失败，请重试');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('网络错误，删除失败');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('zh-CN', {
-      year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -94,12 +121,10 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
         <h1 className="text-2xl font-bold mb-6">
           <div className="h-8 w-24 bg-muted rounded animate-pulse" />
         </h1>
-        <div className="bg-background border border-border rounded-lg shadow-sm p-8">
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-12 bg-muted rounded animate-pulse" />
-            ))}
-          </div>
+        <div className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
+          ))}
         </div>
       </div>
     );
@@ -141,7 +166,8 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
         </div>
       ) : (
         <>
-          <div className="card overflow-hidden">
+          {/* Desktop: table */}
+          <div className="hidden sm:block card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[600px]">
                 <thead className="bg-muted/50 border-b border-border">
@@ -189,12 +215,21 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
                           {attempt.completed_at ? formatDate(attempt.completed_at) : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <a
-                            href={`/quiz/attempts/${attempt.id}`}
-                            className="text-primary hover:text-primary-hover text-sm transition-colors"
-                          >
-                            查看详情
-                          </a>
+                          <div className="flex items-center gap-3">
+                            <a
+                              href={`/quiz/attempts/${attempt.id}`}
+                              className="text-primary hover:text-primary-hover text-sm transition-colors"
+                            >
+                              查看详情
+                            </a>
+                            <button
+                              onClick={() => handleDelete(attempt.id)}
+                              disabled={deletingId === attempt.id}
+                              className="text-destructive hover:text-destructive/80 text-sm transition-colors disabled:opacity-40"
+                            >
+                              {deletingId === attempt.id ? '删除中...' : '删除'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -202,6 +237,57 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Mobile: cards */}
+          <div className="sm:hidden space-y-3">
+            {attempts.map((attempt) => {
+              const percentage = getScorePercentage(attempt.score || 0, attempt.total_points);
+              const scoreColor = getScoreColor(percentage);
+
+              return (
+                <div key={attempt.id} className="card p-4">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <a
+                      href={`/quiz/attempts/${attempt.id}`}
+                      className="text-primary hover:text-primary-hover font-medium text-sm leading-tight flex-1 min-w-0"
+                    >
+                      {attempt.quizzes.title}
+                    </a>
+                    <button
+                      onClick={() => handleDelete(attempt.id)}
+                      disabled={deletingId === attempt.id}
+                      className="text-destructive hover:text-destructive/80 text-xs flex-shrink-0 disabled:opacity-40"
+                    >
+                      {deletingId === attempt.id ? '删除中...' : '删除'}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className={`font-semibold text-lg ${scoreColor}`}>
+                      {attempt.score || 0}/{attempt.total_points}
+                    </span>
+                    <span className={`text-sm font-medium ${scoreColor}`}>{percentage}%</span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden mb-2">
+                    <div
+                      className={`h-1.5 rounded-full ${getScoreBarBg(percentage)}`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{formatTime(attempt.time_taken)}</span>
+                    <span>·</span>
+                    <span>{attempt.completed_at ? formatDate(attempt.completed_at) : '-'}</span>
+                    <a
+                      href={`/quiz/attempts/${attempt.id}`}
+                      className="ml-auto text-primary font-medium"
+                    >
+                      详情 →
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Pagination */}

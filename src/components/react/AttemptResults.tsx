@@ -213,46 +213,46 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
               key={answer.id}
               className={`card border-l-4 ${
                 answer.is_correct ? 'border-l-success' : 'border-l-destructive'
-              } p-5`}
+              } p-3.5 sm:p-5`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{index + 1}.</span>
-                  <span className={`badge ${
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium text-sm">{index + 1}.</span>
+                  <span className={`badge text-xs ${
                     answer.is_correct
                       ? 'bg-success/10 text-success'
                       : 'bg-destructive/10 text-destructive'
                   }`}>
-                    {answer.is_correct ? '✓ 正确' : '✗ 错误'}
+                    {answer.is_correct ? '✓' : '✗'}
                   </span>
-                  <span className="text-sm text-muted-foreground">+{answer.points_awarded || 0}分</span>
+                  <span className="text-xs text-muted-foreground">+{answer.points_awarded || 0}分</span>
                 </div>
-                <span className="text-xs text-muted-foreground/80">
-                  {question.type === 'single_choice' ? '单选题' :
-                    question.type === 'multiple_choice' ? '多选题' :
-                    question.type === 'true_false' ? '判断题' :
-                    question.type === 'fill_blank' ? '填空题' : '简答题'}
+                <span className="text-xs text-muted-foreground/80 flex-shrink-0">
+                  {question.type === 'single_choice' ? '单选' :
+                    question.type === 'multiple_choice' ? '多选' :
+                    question.type === 'true_false' ? '判断' :
+                    question.type === 'fill_blank' ? '填空' : '简答'}
                 </span>
               </div>
               
-              <p className="mb-3 leading-relaxed">{question.content}</p>
+              <p className="mb-2 text-sm sm:text-base leading-relaxed">{question.content}</p>
               
-              <div className="space-y-1.5 text-sm bg-muted/30 rounded-lg p-3">
+              <div className="space-y-1 text-xs sm:text-sm bg-muted/30 rounded-lg p-2.5">
                 <div className="flex gap-2">
-                  <span className="font-medium text-muted-foreground flex-shrink-0">你的答案：</span>
+                  <span className="font-medium text-muted-foreground flex-shrink-0">你：</span>
                   <span className={answer.is_correct ? 'text-success' : 'text-destructive'}>
                     {userAnswer}
                   </span>
                 </div>
                 {!answer.is_correct && (
                   <div className="flex gap-2">
-                    <span className="font-medium text-muted-foreground flex-shrink-0">正确答案：</span>
+                    <span className="font-medium text-muted-foreground flex-shrink-0">正确：</span>
                     <span className="text-success">{correctAnswer}</span>
                   </div>
                 )}
               </div>
               {question.explanation && (
-                <div className="mt-3 p-3 bg-warning/5 border border-warning/20 rounded-lg text-sm text-foreground/80 flex gap-2">
+                <div className="mt-2 p-2.5 bg-warning/5 border border-warning/20 rounded-lg text-xs sm:text-sm text-foreground/80 flex gap-2">
                   <svg className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                   </svg>
@@ -265,11 +265,11 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex justify-center gap-4 pt-2">
-        <a href="/dashboard" className="btn-outline">
+      <div className="flex justify-center gap-3 pt-2 pb-4">
+        <a href="/dashboard" className="btn-outline text-sm">
           返回控制台
         </a>
-        <a href={`/quiz/${attempt.quiz_id}/take`} className="btn-primary">
+        <a href={`/quiz/${attempt.quiz_id}/take`} className="btn-primary text-sm">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
