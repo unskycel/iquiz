@@ -1,8 +1,0 @@
-{
-  "routes": [
-    { "src": "/api/attempts/([^/]+)", "dest": "/api/attempts/[id]" },
-    { "src": "/api/attempts/([^/]+)/answers", "dest": "/api/attempts/[id]/answers" },
-    { "src": "/api/attempts/([^/]+)/complete", "dest": "/api/attempts/[id]/complete" },
-    { "src": "/api/attempts/([^/]+)/answer", "dest": "/api/attempts/[id]/answer" }
-  ]
-}

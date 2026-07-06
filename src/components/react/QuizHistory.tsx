@@ -62,8 +62,12 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
       if (!token) return;
 
       const response = await fetch(`/api/attempts/${attemptId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'delete' }),
       });
 
       if (response.ok) {
