@@ -140,6 +140,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
     setIsSubmitting(true);
     setSubmitError(null);
     try {
+      // 1. 创建答题记录
       const response = await fetch('/api/attempts', {
         method: 'POST',
         headers: {
@@ -154,21 +155,26 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       }
       const { attempt } = await response.json();
 
-      for (const [questionId, answer] of answers.entries()) {
-        const r = await fetch(`/api/attempts/${attempt.id}/answer`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeaders(),
-          },
-          body: JSON.stringify({ questionId, userAnswer: answer }),
-        });
-        if (!r.ok) {
-          const errBody = await r.text();
-          throw new Error(`提交答案失败 题目${questionId} (${r.status}): ${errBody}`);
-        }
+      // 2. 批量提交所有答案（一次请求）
+      const batchAnswers = Array.from(answers.entries()).map(([questionId, userAnswer]) => ({
+        questionId,
+        userAnswer,
+      }));
+
+      const batchResponse = await fetch(`/api/attempts/${attempt.id}/answers`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({ answers: batchAnswers }),
+      });
+      if (!batchResponse.ok) {
+        const errBody = await batchResponse.text();
+        throw new Error(`提交答案失败 (${batchResponse.status}): ${errBody}`);
       }
 
+      // 3. 完成答题
       const completeResponse = await fetch(`/api/attempts/${attempt.id}/complete`, {
         method: 'POST',
         headers: {
