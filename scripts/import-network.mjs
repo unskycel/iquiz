@@ -50,9 +50,12 @@ function parseFile(filePath) {
 
   function flush() {
     if (!currentContent || currentAnswer === null) return;
+    const content = currentChapter
+      ? `【${currentChapter}】${currentContent.trim()}`
+      : currentContent.trim();
     questions.push({
       chapter: currentChapter,
-      content: currentContent.trim(),
+      content,
       options: [...currentOptions],
       answer: currentAnswer,
       explanation: currentExplanation.trim(),
