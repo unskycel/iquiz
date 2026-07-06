@@ -243,54 +243,88 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
       </div>
 
       {/* Navigation buttons */}
-      <div className="flex justify-between items-center mt-5">
-        <button
-          onClick={handlePrev}
-          disabled={currentIndex === 0}
-          className="btn-outline disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent inline-flex items-center gap-1.5"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
-          上一题
-        </button>
+      <div className="mt-5">
+        {/* 移动端：仅上一题/下一题 + 当前题号 */}
+        <div className="flex justify-between items-center gap-2 sm:hidden">
+          <button
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent inline-flex items-center gap-1 whitespace-nowrap px-3 py-2"
+          >
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            上一题
+          </button>
 
-        <div className="flex gap-1.5">
-          {questions.map((q, index) => (
-            <button
-              key={q.id}
-              onClick={() => {
-                setIsFlipping(true);
-                setTimeout(() => {
-                  setShowAnswer(false);
-                  setCurrentIndex(index);
-                  setIsFlipping(false);
-                }, 150);
-              }}
-              className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
-                index === currentIndex
-                  ? 'bg-primary w-6'
-                  : 'bg-muted hover:bg-muted-foreground/40'
-              }`}
-              aria-label={`跳转到第 ${index + 1} 题`}
-            />
-          ))}
+          <div className="text-center text-sm text-muted-foreground tabular-nums whitespace-nowrap">
+            <span className="font-semibold text-foreground">{currentIndex + 1}</span>
+            <span className="mx-1">/</span>
+            <span>{questions.length}</span>
+          </div>
+
+          <button
+            onClick={handleNext}
+            disabled={currentIndex === questions.length - 1}
+            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1 whitespace-nowrap px-3 py-2"
+          >
+            下一题
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
         </div>
 
-        <button
-          onClick={handleNext}
-          disabled={currentIndex === questions.length - 1}
-          className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
-        >
-          下一题
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-          </svg>
-        </button>
+        {/* 桌面端：包含圆点导航 */}
+        <div className="hidden sm:flex justify-between items-center gap-3">
+          <button
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+            className="btn-outline flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent inline-flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            上一题
+          </button>
+
+          <div className="flex-1 flex justify-center gap-1 overflow-hidden">
+            {questions.map((q, index) => (
+              <button
+                key={q.id}
+                onClick={() => {
+                  setIsFlipping(true);
+                  setTimeout(() => {
+                    setShowAnswer(false);
+                    setCurrentIndex(index);
+                    setIsFlipping(false);
+                  }, 150);
+                }}
+                className={`w-2 h-2 rounded-full flex-shrink-0 transition-all duration-200 ${
+                  index === currentIndex
+                    ? 'bg-primary w-6'
+                    : 'bg-muted hover:bg-muted-foreground/40'
+                }`}
+                aria-label={`跳转到第 ${index + 1} 题`}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={handleNext}
+            disabled={currentIndex === questions.length - 1}
+            className="btn-primary flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5 whitespace-nowrap"
+          >
+            下一题
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Tip */}
-      <p className="text-center text-muted-foreground/60 text-xs mt-6">
+      <p className="text-center text-muted-foreground/60 text-xs mt-4">
         支持左右滑动切换卡片
       </p>
     </div>

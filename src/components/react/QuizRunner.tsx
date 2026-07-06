@@ -456,20 +456,20 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="text-muted-foreground hover:text-destructive text-sm font-medium transition-colors px-3 py-2"
+          className="text-muted-foreground hover:text-destructive text-sm font-medium transition-colors px-3 py-2 whitespace-nowrap"
         >
           放弃答题
         </button>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3 flex-wrap">
           <button
             type="button"
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="btn-outline disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+            className="btn-outline disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent whitespace-nowrap"
           >
             上一题
           </button>
@@ -477,7 +477,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             <button
               type="button"
               onClick={handleNext}
-              className="btn-primary"
+              className="btn-primary whitespace-nowrap"
             >
               下一题
             </button>
@@ -486,7 +486,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-6 py-2 bg-success text-success-foreground rounded-lg font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 inline-flex items-center gap-2"
+              className="px-6 py-2 bg-success text-success-foreground rounded-lg font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 inline-flex items-center gap-2 whitespace-nowrap"
             >
               {isSubmitting ? (
                 <>
@@ -525,27 +525,46 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       )}
 
       {/* Question Navigator */}
-      <div className="mt-6 card p-4">
-        <h3 className="text-sm font-medium text-foreground mb-3">题目导航</h3>
-        <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
-          {questions.map((q, index) => (
-            <button
-              key={q.id}
-              type="button"
-              onClick={() => setCurrentIndex(index)}
-              className={`w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200 ${
-                index === currentIndex
-                  ? 'bg-primary text-primary-foreground shadow-soft scale-105'
-                  : answers.has(q.id)
-                  ? 'bg-success/15 text-success hover:bg-success/20'
-                  : 'bg-muted text-muted-foreground hover:bg-accent/10 hover:text-foreground'
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
+      <details className="mt-6 card group" open={questions.length <= 30}>
+        <summary className="p-4 cursor-pointer list-none flex justify-between items-center select-none">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-foreground">题目导航</h3>
+            <span className="text-xs text-muted-foreground">
+              {answers.size}/{questions.length} 已答
+            </span>
+          </div>
+          <svg
+            className="w-4 h-4 text-muted-foreground transition-transform group-open:rotate-180"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+          </svg>
+        </summary>
+        <div className="px-4 pb-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(2.5rem,1fr))] gap-1.5 max-h-[240px] overflow-y-auto">
+            {questions.map((q, index) => (
+              <button
+                key={q.id}
+                type="button"
+                onClick={() => setCurrentIndex(index)}
+                aria-label={`跳转到第 ${index + 1} 题`}
+                className={`h-10 min-w-0 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  index === currentIndex
+                    ? 'bg-primary text-primary-foreground shadow-soft'
+                    : answers.has(q.id)
+                    ? 'bg-success/15 text-success hover:bg-success/20'
+                    : 'bg-muted text-muted-foreground hover:bg-accent/10 hover:text-foreground'
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </details>
     </div>
   );
 }
