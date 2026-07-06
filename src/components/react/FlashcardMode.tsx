@@ -4,10 +4,9 @@ import { getAccessToken } from '../../lib/auth-client';
 
 interface FlashcardModeProps {
   quizId: string;
-  onCancel: () => void;
 }
 
-export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
+export function FlashcardMode({ quizId }: FlashcardModeProps) {
   const [quiz, setQuiz] = useState<{ title: string; description?: string } | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,12 +56,12 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
     return (
       <div className="text-center py-8">
         <p className="text-red-600">{error || '习题不存在'}</p>
-        <button
-          onClick={onCancel}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        <a
+          href="/dashboard"
+          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-block"
         >
           返回
-        </button>
+        </a>
       </div>
     );
   }
@@ -71,12 +70,12 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-600">该习题还没有题目</p>
-        <button
-          onClick={onCancel}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        <a
+          href="/dashboard"
+          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-block"
         >
           返回
-        </button>
+        </a>
       </div>
     );
   }
@@ -187,12 +186,12 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
           <h1 className="text-xl font-semibold">
             📖 背题模式 — {quiz.title}
           </h1>
-          <button
-            onClick={onCancel}
-            className="text-gray-500 hover:text-gray-700 text-sm"
+          <a
+            href="/dashboard"
+            className="text-gray-500 hover:text-gray-700 text-sm cursor-pointer"
           >
             ✕ 退出
-          </button>
+          </a>
         </div>
         <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
           <span>
@@ -430,13 +429,12 @@ export function FlashcardMode({ quizId, onCancel }: FlashcardModeProps) {
               下一题
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={onCancel}
+            <a
+              href="/dashboard"
               className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
             >
               完成
-            </button>
+            </a>
           )}
         </div>
       </div>
