@@ -25,10 +25,10 @@ export const GET: APIRoute = async ({ request, url }) => {
     const quizId = url.searchParams.get('quizId');
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '100', 10), 200);
 
-    // Step 1: Get user's attempt IDs
+    // Step 1: Get user's attempt IDs (with completed_at for date display)
     const { data: attempts, error: attemptsError } = await supabaseAdmin
       .from('quiz_attempts')
-      .select('id')
+      .select('id, completed_at')
       .eq('user_id', user.id);
 
     if (attemptsError) {
@@ -38,7 +38,8 @@ export const GET: APIRoute = async ({ request, url }) => {
       });
     }
 
-    const attemptIds = (attempts || []).map(a => a.id);
+    const attemptMap = new Map((attempts || []).map((a: any) => [a.id, a]));
+    const attemptIds = Array.from(attemptMap.keys());
     if (attemptIds.length === 0) {
       return new Response(JSON.stringify({
         wrongAnswers: [],
@@ -53,10 +54,9 @@ export const GET: APIRoute = async ({ request, url }) => {
     // Step 2: Fetch incorrect answers for these attempts
     let answerQuery = supabaseAdmin
       .from('attempt_answers')
-      .select('id, user_answer, is_correct, points_awarded, created_at, question_id, attempt_id')
+      .select('id, user_answer, is_correct, points_awarded, question_id, attempt_id')
       .in('attempt_id', attemptIds)
-      .eq('is_correct', false)
-      .order('created_at', { ascending: false });
+      .eq('is_correct', false);
 
     if (quizId) {
       // Need question_ids belonging to this quiz — fetch them first
@@ -159,7 +159,7 @@ export const GET: APIRoute = async ({ request, url }) => {
         user_answer: wa.user_answer,
         is_correct: wa.is_correct,
         points_awarded: wa.points_awarded,
-        created_at: wa.created_at,
+        created_at: attemptMap.get(wa.attempt_id)?.completed_at || null,
         question: {
           id: q.id,
           type: q.type,
