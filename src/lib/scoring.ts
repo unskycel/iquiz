@@ -152,7 +152,11 @@ function gradeFillBlank(
 }
 
 /**
- * Parse fill_blank correct_answer — may be a plain string or a JSON array string
+ * Parse fill_blank correct_answer — may be:
+ *   - JS array (supabase-js jsonb column)
+ *   - JSON stringified array (e.g. '["a","b"]')
+ *   - plain comma-separated string (e.g. '连通性,共享性')
+ *   - plain single-answer string
  */
 function parseFillBlankAnswer(raw: string): string | string[] {
   const trimmed = raw.trim();
@@ -162,7 +166,12 @@ function parseFillBlankAnswer(raw: string): string | string[] {
       if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed.map((s: unknown) => String(s));
       }
-    } catch { /* fall through to plain string */ }
+    } catch { /* fall through */ }
+  }
+  // Multi-answer plain string: split on common separators
+  const parts = trimmed.split(/[，,、；;]/).map(s => s.trim()).filter(Boolean);
+  if (parts.length > 1) {
+    return parts;
   }
   return raw;
 }
