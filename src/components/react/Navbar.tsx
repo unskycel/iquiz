@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  'https://fiiyveabpfpaumxtybvu.supabase.co',
-  'sb_publishable_IinQXFb_Vetqhvg4bVxELQ_S450ikxn'
-);
+import { supabase } from '../../lib/supabase-client';
 
 function ThemeToggle() {
   const [dark, setDark] = useState(false);

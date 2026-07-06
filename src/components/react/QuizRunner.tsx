@@ -459,7 +459,9 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       <div className="flex flex-wrap justify-between items-center gap-2">
         <button
           type="button"
-          onClick={onCancel}
+          onClick={() => {
+            if (confirm('确定要放弃答题吗？已作答的记录将不会保存。')) onCancel();
+          }}
           className="text-muted-foreground hover:text-destructive text-sm font-medium transition-colors px-3 py-2 whitespace-nowrap"
         >
           放弃答题
@@ -486,7 +488,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-6 py-2 bg-success text-success-foreground rounded-lg font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 inline-flex items-center gap-2 whitespace-nowrap"
+              className="px-6 py-2 bg-success text-success-foreground rounded-lg font-medium hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap inline-flex items-center justify-center gap-1.5"
             >
               {isSubmitting ? (
                 <>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Question } from '../../types';
 import { getAccessToken } from '../../lib/auth-client';
+import { formatCorrectAnswer } from '../../lib/format';
 
 interface FlashcardModeProps {
   quizId: string;
@@ -47,21 +48,6 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatCorrectAnswer = (raw: string | string[]): string => {
-    if (Array.isArray(raw)) {
-      return raw.join(', ');
-    }
-    if (typeof raw === 'string' && raw.trim().startsWith('[')) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          return parsed.map((v: string, i: number) => `空${i + 1}: ${v}`).join('；');
-        }
-      } catch { /* fall through */ }
-    }
-    return String(raw);
   };
 
   const handleNext = () => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { QuizAttempt, Question, AttemptAnswer } from '../../types';
 import { getAccessToken } from '../../lib/auth-client';
+import { formatCorrectAnswer } from '../../lib/format';
 
 interface AttemptResultsProps {
   attemptId: string;
@@ -53,18 +54,6 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
     return `${mins}分${secs}秒`;
   };
 
-  const formatCorrectAnswer = (raw: string | string[]): string => {
-    if (typeof raw === 'string' && raw.trim().startsWith('[')) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          return parsed.map((v: string, i: number) => `空${i + 1}: ${v}`).join('；');
-        }
-      } catch { /* fall through */ }
-    }
-    return String(raw);
-  };
-
   const getScorePercentage = (score: number, totalPoints: number): number => {
     return totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0;
   };
@@ -86,7 +75,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${data?.attempt.quizzes.title || '结果'}_结果.html`;
+      a.download = `${data?.attempt.quizzes.title || '结果'}_结果.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -148,7 +137,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0L16.5 7.5M12 3v13.5" />
             </svg>
-            导出
+            导出结果
           </button>
         </div>
         {exportError && (

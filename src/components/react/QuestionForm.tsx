@@ -2,18 +2,10 @@ import React, { useState } from 'react';
 import type { Question, QuestionOption } from '../../types';
 import type { QuestionError } from '../../lib/validation';
 
-interface QuestionFormProps {
-  question: Question;
-  index: number;
-  errors?: QuestionError | null;
-  onUpdate: (updates: Partial<Question>) => void;
-  onDelete: () => void;
-}
-
-export function QuestionForm({ question, index, errors = null, onUpdate, onDelete }: QuestionFormProps) {
+/* === 独立纯函数，不依赖 QuestionForm 渲染周期 === */
 
 /**
- * 独立、纯函数。空数从 correct_answer 推断：数组→length；JSON 字符串→length；否则 1。
+ * 空数从 correct_answer 推断：数组→length；JSON 字符串→length；否则 1。
  */
 function getEditorBlankCount(correctAnswer: Question['correct_answer']): number {
   if (Array.isArray(correctAnswer)) return Math.max(1, correctAnswer.length);
@@ -28,17 +20,17 @@ function getEditorBlankCount(correctAnswer: Question['correct_answer']): number 
 
 function BlankCountSelector({ count, onChange }: { count: number; onChange: (n: number) => void }) {
   return (
-    <div className="flex items-center gap-1 text-xs">
-      <span className="text-muted-foreground">空数</span>
+    <div className="flex items-center gap-1 text-xs flex-wrap">
+      <span className="text-muted-foreground mr-1">空数</span>
       {[1, 2, 3, 4, 5, 6].map(n => (
         <button
           key={n}
           type="button"
           onClick={() => onChange(n)}
-          className={`px-2 py-0.5 rounded border ${
+          className={`px-2 py-0.5 rounded border transition-colors ${
             count === n
-              ? 'bg-primary text-primary-foreground border-indigo-600'
-              : 'bg-background text-muted-foreground border-border hover:border-indigo-400'
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-background text-muted-foreground border-border hover:border-primary/60'
           }`}
         >
           {n}
@@ -84,13 +76,15 @@ function FillBlankEditor({
     onChange(next);
   };
 
+  const errorClass = hasError ? 'border-destructive bg-destructive/5' : 'border-border';
+
   if (count === 1) {
     return (
       <input
         type="text"
         value={arr[0] ?? ''}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-border'}`}
+        className={`input-field ${errorClass}`}
         placeholder="输入正确答案"
       />
     );
@@ -105,7 +99,7 @@ function FillBlankEditor({
             type="text"
             value={v}
             onChange={(e) => setAt(i, e.target.value)}
-            className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-border'}`}
+            className={`input-field ${errorClass}`}
             placeholder={`输入第 ${i + 1} 个空的答案`}
           />
         </div>
@@ -113,6 +107,18 @@ function FillBlankEditor({
     </div>
   );
 }
+
+/* === QuestionForm 主组件 === */
+
+interface QuestionFormProps {
+  question: Question;
+  index: number;
+  errors?: QuestionError | null;
+  onUpdate: (updates: Partial<Question>) => void;
+  onDelete: () => void;
+}
+
+export function QuestionForm({ question, index, errors = null, onUpdate, onDelete }: QuestionFormProps) {
   const [options, setOptions] = useState<QuestionOption[]>(
     question.type === 'single_choice' || question.type === 'multiple_choice'
       ? (question.question_options || [])
@@ -126,8 +132,7 @@ function FillBlankEditor({
   const handleTypeChange = (type: Question['type']) => {
     const updates: Partial<Question> = { type };
     let newOptions: QuestionOption[] = [];
-    
-    // Reset correct_answer based on type
+
     if (type === 'multiple_choice') {
       updates.correct_answer = [];
     } else if (type === 'true_false') {
@@ -139,7 +144,7 @@ function FillBlankEditor({
     } else {
       updates.correct_answer = '';
     }
-    
+
     setOptions(newOptions);
     onUpdate({ ...updates, question_options: newOptions });
   };
@@ -207,28 +212,31 @@ function FillBlankEditor({
 
   const getTypeColor = (type: Question['type']): string => {
     const colors: Record<Question['type'], string> = {
-      single_choice: 'bg-indigo-100 text-indigo-700',
-      multiple_choice: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
-      true_false: 'bg-yellow-100 text-yellow-700',
-      fill_blank: 'bg-purple-100 text-purple-700',
-      short_answer: 'bg-pink-100 text-pink-700',
+      single_choice: 'bg-primary-light text-primary',
+      multiple_choice: 'bg-success/10 text-success',
+      true_false: 'bg-warning/10 text-warning',
+      fill_blank: 'bg-accent/10 text-accent',
+      short_answer: 'bg-destructive/10 text-destructive',
     };
     return colors[type];
   };
+
+  const errorBorderClass = (hasError: boolean) =>
+    hasError ? 'border-destructive bg-destructive/5' : 'border-border';
 
   return (
     <div className="border border-border rounded-lg p-4 bg-background">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-2">
           <span className="font-medium text-foreground">题目 {index + 1}</span>
-          <span className={`px-2 py-0.5 text-xs rounded-full ${getTypeColor(question.type)}`}>
+          <span className={`badge ${getTypeColor(question.type)}`}>
             {getTypeLabel(question.type)}
           </span>
         </div>
         <button
           type="button"
           onClick={onDelete}
-          className="text-red-600 hover:text-red-700 text-sm"
+          className="text-destructive hover:opacity-80 text-sm transition-opacity"
         >
           删除
         </button>
@@ -241,7 +249,7 @@ function FillBlankEditor({
           <select
             value={question.type}
             onChange={(e) => handleTypeChange(e.target.value as Question['type'])}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            className="input-field"
           >
             <option value="single_choice">单选题</option>
             <option value="multiple_choice">多选题</option>
@@ -258,11 +266,11 @@ function FillBlankEditor({
             value={question.content}
             onChange={(e) => handleContentChange(e.target.value)}
             rows={2}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.content ? 'border-red-400 bg-red-50' : 'border-border'}`}
+            className={`input-field ${errorBorderClass(!!errors?.content)}`}
             placeholder="输入题目内容"
           />
           {errors?.content && (
-            <p className="mt-1 text-sm text-red-600">{errors.content}</p>
+            <p className="mt-1 text-sm text-destructive">{errors.content}</p>
           )}
         </div>
 
@@ -277,19 +285,19 @@ function FillBlankEditor({
                     type={question.type === 'single_choice' ? 'radio' : 'checkbox'}
                     checked={option.is_correct}
                     onChange={() => handleCorrectChange(optIndex)}
-                    className="text-indigo-600"
+                    className="text-primary"
                   />
                   <input
                     type="text"
                     value={option.content}
                     onChange={(e) => handleOptionChange(optIndex, e.target.value)}
-                    className={`flex-1 px-3 py-1 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.options || errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-border'}`}
+                    className={`input-field ${errorBorderClass(!!errors?.options || !!errors?.correctAnswer)}`}
                     placeholder={`选项 ${String.fromCharCode(65 + optIndex)}`}
                   />
                   <button
                     type="button"
                     onClick={() => removeOption(optIndex)}
-                    className="text-red-500 hover:text-red-600"
+                    className="text-destructive/60 hover:text-destructive text-lg leading-none px-1 transition-colors"
                   >
                     ×
                   </button>
@@ -297,15 +305,15 @@ function FillBlankEditor({
               ))}
             </div>
             {errors?.options && (
-              <p className="mt-1 text-sm text-red-600">{errors.options}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.options}</p>
             )}
             {errors?.correctAnswer && (
-              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.correctAnswer}</p>
             )}
             <button
               type="button"
               onClick={addOption}
-              className="mt-2 text-sm text-indigo-600 hover:text-indigo-700"
+              className="mt-2 text-sm text-primary hover:text-primary-hover transition-colors"
             >
               + 添加选项
             </button>
@@ -322,7 +330,7 @@ function FillBlankEditor({
                   type="radio"
                   checked={question.correct_answer === 'true'}
                   onChange={() => onUpdate({ correct_answer: 'true' })}
-                  className="text-indigo-600"
+                  className="text-primary"
                 />
                 <span className="ml-2">正确</span>
               </label>
@@ -331,13 +339,13 @@ function FillBlankEditor({
                   type="radio"
                   checked={question.correct_answer === 'false'}
                   onChange={() => onUpdate({ correct_answer: 'false' })}
-                  className="text-indigo-600"
+                  className="text-primary"
                 />
                 <span className="ml-2">错误</span>
               </label>
             </div>
             {errors?.correctAnswer && (
-              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.correctAnswer}</p>
             )}
           </div>
         )}
@@ -358,7 +366,7 @@ function FillBlankEditor({
               hasError={!!errors?.correctAnswer}
             />
             {errors?.correctAnswer && (
-              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.correctAnswer}</p>
             )}
           </div>
         )}
@@ -371,11 +379,11 @@ function FillBlankEditor({
               value={question.correct_answer as string}
               onChange={(e) => onUpdate({ correct_answer: e.target.value })}
               rows={3}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-border'}`}
+              className={`input-field ${errorBorderClass(!!errors?.correctAnswer)}`}
               placeholder="输入参考答案"
             />
             {errors?.correctAnswer && (
-              <p className="mt-1 text-sm text-red-600">{errors.correctAnswer}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.correctAnswer}</p>
             )}
           </div>
         )}
@@ -388,10 +396,10 @@ function FillBlankEditor({
             value={question.points}
             onChange={(e) => onUpdate({ points: parseInt(e.target.value) || 1 })}
             min="1"
-            className={`w-24 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.points ? 'border-red-400 bg-red-50' : 'border-border'}`}
+            className={`input-field w-24 ${errorBorderClass(!!errors?.points)}`}
           />
           {errors?.points && (
-            <p className="mt-1 text-sm text-red-600">{errors.points}</p>
+            <p className="mt-1 text-sm text-destructive">{errors.points}</p>
           )}
         </div>
 
@@ -402,7 +410,7 @@ function FillBlankEditor({
             value={question.explanation || ''}
             onChange={(e) => onUpdate({ explanation: e.target.value })}
             rows={2}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            className="input-field"
             placeholder="输入题目解析"
           />
         </div>

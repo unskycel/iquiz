@@ -71,8 +71,6 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
 }
@@ -229,7 +227,11 @@
 
 /* === 移动端触控优化 === */
 @media (max-width: 768px) {
-  button, a, input, select, textarea {
+  .btn-primary, .btn-outline, .btn-secondary {
+    min-height: 44px;
+  }
+
+  .input-field {
     min-height: 44px;
   }
 
