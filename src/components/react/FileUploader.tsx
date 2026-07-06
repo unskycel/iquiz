@@ -102,8 +102,8 @@ export function FileUploader({ quizId, onUploadComplete, onDelete }: FileUploade
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           isDragging
-            ? 'border-indigo-500 bg-indigo-50'
-            : 'border-gray-300 hover:border-gray-400'
+            ? 'border-primary bg-accent'
+            : 'border-border hover:border-muted-foreground'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -111,11 +111,11 @@ export function FileUploader({ quizId, onUploadComplete, onDelete }: FileUploade
       >
         {isUploading ? (
           <div>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">上传中...</p>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">上传中...</p>
+            <div className="w-full bg-muted rounded-full h-2 mt-4">
               <div
-                className="bg-indigo-600 h-2 rounded-full transition-all"
+                className="bg-primary h-2 rounded-full transition-all"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
@@ -123,7 +123,7 @@ export function FileUploader({ quizId, onUploadComplete, onDelete }: FileUploade
         ) : (
           <>
             <svg
-              className="w-12 h-12 text-gray-400 mx-auto mb-4"
+              className="w-12 h-12 text-muted-foreground mx-auto mb-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -135,15 +135,15 @@ export function FileUploader({ quizId, onUploadComplete, onDelete }: FileUploade
                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
-            <p className="text-gray-600 mb-2">拖拽文件到此处，或</p>
+            <p className="text-muted-foreground mb-2">拖拽文件到此处，或</p>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
+              className="text-primary hover:opacity-80 font-medium"
             >
               点击选择文件
             </button>
-            <p className="text-sm text-gray-500 mt-2">支持 PDF、PNG、JPEG 格式，最大 10MB</p>
+            <p className="text-sm text-muted-foreground mt-2">支持 PDF、PNG、JPEG 格式，最大 10MB</p>
           </>
         )}
       </div>

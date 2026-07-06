@@ -101,7 +101,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-        <p className="mt-2 text-gray-600">加载中...</p>
+        <p className="mt-2 text-muted-foreground">加载中...</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
     return (
       <div className="text-center py-8">
         <p className="text-red-600">{error || '加载失败'}</p>
-        <a href="/dashboard" className="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <a href="/dashboard" className="mt-4 inline-block px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90">
           返回控制台
         </a>
       </div>
@@ -127,15 +127,15 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-background border border-border rounded-lg shadow-sm p-6">
         <h1 className="text-2xl font-bold mb-2">{attempt.quizzes.title} - 答题结果</h1>
         <div className="flex justify-between items-center">
-          <span className="text-gray-600">
+          <span className="text-muted-foreground">
             完成时间: {attempt.completed_at ? new Date(attempt.completed_at).toLocaleString('zh-CN') : '-'}
           </span>
           <button
             onClick={handleExportPDF}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+            className="px-4 py-2 border border-border rounded-lg hover:bg-accent text-sm"
           >
             导出 PDF
           </button>
@@ -149,23 +149,23 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
       </div>
 
       {/* Score Summary */}
-      <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+      <div className="bg-background border border-border rounded-lg shadow-sm p-6 text-center">
         <div className={`text-5xl font-bold mb-2 ${percentage >= 60 ? 'text-green-600' : 'text-red-600'}`}>
           {score}分
         </div>
-        <div className="text-xl text-gray-600 mb-4">{percentage}%</div>
+        <div className="text-xl text-muted-foreground mb-4">{percentage}%</div>
         <div className="flex justify-center gap-8">
           <div>
             <div className="text-2xl font-bold text-green-600">{correctCount}</div>
-            <div className="text-gray-600">正确</div>
+            <div className="text-muted-foreground">正确</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-red-600">{incorrectCount}</div>
-            <div className="text-gray-600">错误</div>
+            <div className="text-muted-foreground">错误</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-600">{formatTime(attempt.time_taken)}</div>
-            <div className="text-gray-600">用时</div>
+            <div className="text-2xl font-bold text-muted-foreground">{formatTime(attempt.time_taken)}</div>
+            <div className="text-muted-foreground">用时</div>
           </div>
         </div>
       </div>
@@ -196,7 +196,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
           return (
             <div
               key={answer.id}
-              className={`bg-white rounded-lg shadow-sm p-6 border-l-4 ${
+              className={`bg-background border border-border rounded-lg shadow-sm p-6 border-l-4 ${
                 answer.is_correct ? 'border-green-500' : 'border-red-500'
               }`}
             >
@@ -206,15 +206,15 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
                   <span
                     className={`px-2 py-0.5 text-xs rounded-full ${
                       answer.is_correct
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                     }`}
                   >
                     {answer.is_correct ? '正确' : '错误'}
                   </span>
-                  <span className="text-sm text-gray-500">+{answer.points_awarded || 0}分</span>
+                  <span className="text-sm text-muted-foreground">+{answer.points_awarded || 0}分</span>
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted-foreground">
                   [{question.type === 'single_choice' ? '单选题' :
                     question.type === 'multiple_choice' ? '多选题' :
                     question.type === 'true_false' ? '判断题' :
@@ -238,7 +238,7 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
                   </div>
                 )}
                 {question.explanation && (
-                  <div className="mt-2 p-3 bg-gray-50 rounded">
+                  <div className="mt-2 p-3 bg-muted rounded">
                     <span className="font-medium">解析：</span>
                     {question.explanation}
                   </div>
@@ -253,13 +253,13 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
       <div className="flex justify-center space-x-4">
         <a
           href="/dashboard"
-          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="px-6 py-2 border border-border rounded-lg hover:bg-accent"
         >
           返回控制台
         </a>
         <a
           href={`/quiz/${attempt.quiz_id}/take`}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
         >
           重新答题
         </a>

@@ -28,7 +28,7 @@ export function SortableItem({ id, children }: SortableItemProps) {
       <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-8">
         <button
           type="button"
-          className="p-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+          className="p-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing"
           {...attributes}
           {...listeners}
         >

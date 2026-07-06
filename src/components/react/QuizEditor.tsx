@@ -191,7 +191,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
       {loading && (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">加载中…</p>
+          <p className="mt-2 text-muted-foreground">加载中…</p>
         </div>
       )}
       {loadError && (
@@ -201,36 +201,36 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
       )}
       <div className="space-y-6">
       {/* Quiz Info */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-background border border-border rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">基本信息</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">习题标题 *</label>
+            <label className="block text-sm font-medium text-foreground mb-1">习题标题 *</label>
             <input
               type="text"
               value={quiz.title}
               onChange={(e) => setQuiz({ ...quiz, title: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${(validationError && !(quiz.title || '').trim()) ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${(validationError && !(quiz.title || '').trim()) ? 'border-red-400 bg-red-50' : 'border-border'}`}
               placeholder="输入习题标题"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <label className="block text-sm font-medium text-foreground mb-1">描述</label>
             <textarea
               value={quiz.description || ''}
               onChange={(e) => setQuiz({ ...quiz, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               placeholder="输入习题描述（可选）"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+            <label className="block text-sm font-medium text-foreground mb-1">标签</label>
             <input
               type="text"
               value={(quiz.tags || []).join(', ')}
               onChange={(e) => setQuiz({ ...quiz, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
               placeholder="用逗号分隔多个标签"
             />
           </div>
@@ -238,7 +238,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
       </div>
 
       {/* Questions */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-background border border-border rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">题目 ({questions.length})</h2>
           {/* Desktop: inline buttons */}
@@ -253,7 +253,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
             <button
               type="button"
               onClick={() => addQuestion('multiple_choice')}
-              className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
+              className="px-3 py-1 text-sm bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 rounded-lg hover:bg-green-200"
             >
               + 多选题
             </button>
@@ -281,7 +281,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
           </div>
           {/* Mobile: dropdown */}
           <select
-            className="md:hidden px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="md:hidden px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             onChange={(e) => {
               if (e.target.value) {
                 addQuestion(e.target.value as QuestionType);
@@ -300,7 +300,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
         </div>
 
         {questions.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             点击上方按钮添加题目
           </div>
         ) : (
@@ -352,7 +352,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-6 py-2 border border-border rounded-lg hover:bg-accent transition-colors"
         >
           取消
         </button>
@@ -360,7 +360,7 @@ export function QuizEditor({ quizId, initialQuiz, initialQuestions = [], onSave,
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
         >
           {isSaving ? '保存中...' : '保存习题'}
         </button>

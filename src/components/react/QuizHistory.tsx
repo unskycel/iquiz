@@ -85,12 +85,12 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
     return (
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold mb-6">
-          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+          <div className="h-8 w-24 bg-muted rounded animate-pulse" />
         </h1>
-        <div className="bg-white rounded-lg shadow-sm p-8">
+        <div className="bg-background border border-border rounded-lg shadow-sm p-8">
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-100 rounded animate-pulse" />
+              <div key={i} className="h-12 bg-muted rounded animate-pulse" />
             ))}
           </div>
         </div>
@@ -115,32 +115,32 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
       <h1 className="text-2xl font-bold">答题历史</h1>
 
       {attempts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
+        <div className="bg-background border border-border rounded-lg shadow-sm p-8 text-center text-muted-foreground">
           还没有答题记录
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <div className="bg-background border border-border rounded-lg shadow-sm overflow-x-auto">
             <table className="w-full min-w-[600px]">
-              <thead className="bg-gray-50">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">习题</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分数</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">正确率</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">用时</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">完成时间</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">习题</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">分数</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">正确率</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">用时</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">完成时间</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {attempts.map((attempt) => {
                   const percentage = getScorePercentage(attempt.score || 0, attempt.total_points);
                   const scoreColor = getScoreColor(percentage);
 
                   return (
-                    <tr key={attempt.id} className="hover:bg-gray-50">
+                    <tr key={attempt.id} className="hover:bg-accent">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{attempt.quizzes.title}</div>
+                        <div className="font-medium text-foreground">{attempt.quizzes.title}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`font-medium ${scoreColor}`}>
@@ -149,7 +149,7 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                          <div className="w-16 bg-muted rounded-full h-2 mr-2">
                             <div
                               className={`h-2 rounded-full ${
                                 percentage >= 60 ? 'bg-green-500' : 'bg-red-500'
@@ -160,16 +160,16 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
                           <span className={`text-sm ${scoreColor}`}>{percentage}%</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                         {formatTime(attempt.time_taken)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                         {attempt.completed_at ? formatDate(attempt.completed_at) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <a
                           href={`/quiz/attempts/${attempt.id}`}
-                          className="text-indigo-600 hover:text-indigo-700 text-sm"
+                          className="text-primary hover:opacity-80 text-sm"
                         >
                           查看详情
                         </a>
@@ -187,17 +187,17 @@ export function QuizHistory({ userId }: QuizHistoryProps) {
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 上一页
               </button>
-              <span className="px-4 py-2 text-gray-600">
+              <span className="px-4 py-2 text-muted-foreground">
                 第 {page} / {totalPages} 页
               </span>
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 下一页
               </button>

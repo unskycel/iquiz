@@ -19,10 +19,10 @@ export function useToast() {
 }
 
 const TOAST_COLORS: Record<ToastType, string> = {
-  success: 'bg-green-600',
-  error: 'bg-red-600',
-  info: 'bg-indigo-600',
-  warning: 'bg-yellow-500',
+  success: 'bg-green-600 text-white',
+  error: 'bg-red-600 text-white',
+  info: 'bg-primary text-primary-foreground',
+  warning: 'bg-yellow-500 text-white',
 };
 
 let toastId = 0;
@@ -55,7 +55,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`${TOAST_COLORS[toast.type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-slide-up cursor-pointer`}
+            className={`${TOAST_COLORS[toast.type]} px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-slide-up cursor-pointer`}
             onClick={() => dismissToast(toast.id)}
           >
             <span className="flex-1 text-sm">{toast.message}</span>

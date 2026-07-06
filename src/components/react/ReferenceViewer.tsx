@@ -50,10 +50,10 @@ export function ReferenceViewer({ materials, onDelete }: ReferenceViewerProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-medium text-gray-700">参考资料</h3>
+      <h3 className="font-medium text-foreground">参考资料</h3>
 
       {materials.length === 0 ? (
-        <div className="text-center py-4 text-gray-500 text-sm">
+        <div className="text-center py-4 text-muted-foreground text-sm">
           暂无参考资料
         </div>
       ) : (
@@ -61,25 +61,25 @@ export function ReferenceViewer({ materials, onDelete }: ReferenceViewerProps) {
           {materials.map((material) => (
             <div
               key={material.id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+              className="border border-border rounded-lg p-4 hover:shadow-sm transition-shadow"
             >
               <div className="flex items-start space-x-3">
                 {getFileIcon(material.file_type)}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">{material.file_name}</p>
-                  <p className="text-sm text-gray-500">{formatFileSize(material.file_size)}</p>
+                  <p className="font-medium text-foreground truncate">{material.file_name}</p>
+                  <p className="text-sm text-muted-foreground">{formatFileSize(material.file_size)}</p>
                 </div>
               </div>
               <div className="mt-3 flex space-x-2">
                 <button
                   onClick={() => handleView(material)}
-                  className="flex-1 py-1 text-sm text-indigo-600 hover:text-indigo-700 border border-indigo-200 rounded"
+                  className="flex-1 py-1 text-sm text-primary hover:opacity-80 border border-primary/20 rounded"
                 >
                   查看
                 </button>
                 <button
                   onClick={() => handleDownload(material)}
-                  className="flex-1 py-1 text-sm text-gray-600 hover:text-gray-700 border border-gray-200 rounded"
+                  className="flex-1 py-1 text-sm text-muted-foreground hover:text-foreground border border-border rounded"
                 >
                   下载
                 </button>
@@ -89,7 +89,7 @@ export function ReferenceViewer({ materials, onDelete }: ReferenceViewerProps) {
                       onDelete(material.id);
                     }
                   }}
-                  className="py-1 px-2 text-sm text-red-600 hover:text-red-700 border border-red-200 rounded"
+                  className="py-1 px-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 rounded"
                 >
                   删除
                 </button>
@@ -102,12 +102,12 @@ export function ReferenceViewer({ materials, onDelete }: ReferenceViewerProps) {
       {/* Modal */}
       {selectedMaterial && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl max-h-[90vh] w-full overflow-hidden">
+          <div className="bg-background border border-border rounded-lg max-w-4xl max-h-[90vh] w-full overflow-hidden">
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className="font-medium">{selectedMaterial.file_name}</h3>
               <button
                 onClick={handleClose}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

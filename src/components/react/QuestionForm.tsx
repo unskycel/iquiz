@@ -29,7 +29,7 @@ function getEditorBlankCount(correctAnswer: Question['correct_answer']): number 
 function BlankCountSelector({ count, onChange }: { count: number; onChange: (n: number) => void }) {
   return (
     <div className="flex items-center gap-1 text-xs">
-      <span className="text-gray-500">空数</span>
+      <span className="text-muted-foreground">空数</span>
       {[1, 2, 3, 4, 5, 6].map(n => (
         <button
           key={n}
@@ -37,8 +37,8 @@ function BlankCountSelector({ count, onChange }: { count: number; onChange: (n: 
           onClick={() => onChange(n)}
           className={`px-2 py-0.5 rounded border ${
             count === n
-              ? 'bg-indigo-600 text-white border-indigo-600'
-              : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+              ? 'bg-primary text-primary-foreground border-indigo-600'
+              : 'bg-background text-muted-foreground border-border hover:border-indigo-400'
           }`}
         >
           {n}
@@ -90,7 +90,7 @@ function FillBlankEditor({
         type="text"
         value={arr[0] ?? ''}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-border'}`}
         placeholder="输入正确答案"
       />
     );
@@ -100,12 +100,12 @@ function FillBlankEditor({
     <div className="space-y-2">
       {arr.map((v, i) => (
         <div key={i} className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-500 w-12 flex-shrink-0">空 {i + 1}</span>
+          <span className="text-sm font-medium text-muted-foreground w-12 flex-shrink-0">空 {i + 1}</span>
           <input
             type="text"
             value={v}
             onChange={(e) => setAt(i, e.target.value)}
-            className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+            className={`flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${hasError ? 'border-red-400 bg-red-50' : 'border-border'}`}
             placeholder={`输入第 ${i + 1} 个空的答案`}
           />
         </div>
@@ -208,7 +208,7 @@ function FillBlankEditor({
   const getTypeColor = (type: Question['type']): string => {
     const colors: Record<Question['type'], string> = {
       single_choice: 'bg-indigo-100 text-indigo-700',
-      multiple_choice: 'bg-green-100 text-green-700',
+      multiple_choice: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
       true_false: 'bg-yellow-100 text-yellow-700',
       fill_blank: 'bg-purple-100 text-purple-700',
       short_answer: 'bg-pink-100 text-pink-700',
@@ -217,10 +217,10 @@ function FillBlankEditor({
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white">
+    <div className="border border-border rounded-lg p-4 bg-background">
       <div className="flex justify-between items-start mb-4">
         <div className="flex items-center space-x-2">
-          <span className="font-medium text-gray-700">题目 {index + 1}</span>
+          <span className="font-medium text-foreground">题目 {index + 1}</span>
           <span className={`px-2 py-0.5 text-xs rounded-full ${getTypeColor(question.type)}`}>
             {getTypeLabel(question.type)}
           </span>
@@ -237,11 +237,11 @@ function FillBlankEditor({
       <div className="space-y-4">
         {/* Question Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">题目类型</label>
+          <label className="block text-sm font-medium text-foreground mb-1">题目类型</label>
           <select
             value={question.type}
             onChange={(e) => handleTypeChange(e.target.value as Question['type'])}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
           >
             <option value="single_choice">单选题</option>
             <option value="multiple_choice">多选题</option>
@@ -253,12 +253,12 @@ function FillBlankEditor({
 
         {/* Question Content */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">题目内容 *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">题目内容 *</label>
           <textarea
             value={question.content}
             onChange={(e) => handleContentChange(e.target.value)}
             rows={2}
-            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.content ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.content ? 'border-red-400 bg-red-50' : 'border-border'}`}
             placeholder="输入题目内容"
           />
           {errors?.content && (
@@ -269,7 +269,7 @@ function FillBlankEditor({
         {/* Options for choice questions */}
         {(question.type === 'single_choice' || question.type === 'multiple_choice') && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">选项</label>
+            <label className="block text-sm font-medium text-foreground mb-1">选项</label>
             <div className="space-y-2">
               {options.map((option, optIndex) => (
                 <div key={option.id} className="flex items-center space-x-2">
@@ -283,7 +283,7 @@ function FillBlankEditor({
                     type="text"
                     value={option.content}
                     onChange={(e) => handleOptionChange(optIndex, e.target.value)}
-                    className={`flex-1 px-3 py-1 border rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.options || errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+                    className={`flex-1 px-3 py-1 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.options || errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-border'}`}
                     placeholder={`选项 ${String.fromCharCode(65 + optIndex)}`}
                   />
                   <button
@@ -315,7 +315,7 @@ function FillBlankEditor({
         {/* True/False display */}
         {question.type === 'true_false' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">正确答案</label>
+            <label className="block text-sm font-medium text-foreground mb-1">正确答案</label>
             <div className="flex space-x-4">
               <label className="flex items-center">
                 <input
@@ -346,7 +346,7 @@ function FillBlankEditor({
         {question.type === 'fill_blank' && (
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">正确答案</label>
+              <label className="block text-sm font-medium text-foreground">正确答案</label>
               <BlankCountSelector
                 count={getEditorBlankCount(question.correct_answer)}
                 onChange={(n) => onUpdate({ correct_answer: n === 1 ? '' : new Array(n).fill('') })}
@@ -366,12 +366,12 @@ function FillBlankEditor({
         {/* Short answer */}
         {question.type === 'short_answer' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">参考答案</label>
+            <label className="block text-sm font-medium text-foreground mb-1">参考答案</label>
             <textarea
               value={question.correct_answer as string}
               onChange={(e) => onUpdate({ correct_answer: e.target.value })}
               rows={3}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.correctAnswer ? 'border-red-400 bg-red-50' : 'border-border'}`}
               placeholder="输入参考答案"
             />
             {errors?.correctAnswer && (
@@ -382,13 +382,13 @@ function FillBlankEditor({
 
         {/* Points */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">分值</label>
+          <label className="block text-sm font-medium text-foreground mb-1">分值</label>
           <input
             type="number"
             value={question.points}
             onChange={(e) => onUpdate({ points: parseInt(e.target.value) || 1 })}
             min="1"
-            className={`w-24 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none ${errors?.points ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+            className={`w-24 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors?.points ? 'border-red-400 bg-red-50' : 'border-border'}`}
           />
           {errors?.points && (
             <p className="mt-1 text-sm text-red-600">{errors.points}</p>
@@ -397,12 +397,12 @@ function FillBlankEditor({
 
         {/* Explanation */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">解析（可选）</label>
+          <label className="block text-sm font-medium text-foreground mb-1">解析（可选）</label>
           <textarea
             value={question.explanation || ''}
             onChange={(e) => onUpdate({ explanation: e.target.value })}
             rows={2}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             placeholder="输入题目解析"
           />
         </div>

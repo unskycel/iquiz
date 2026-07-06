@@ -67,8 +67,8 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
   if (loading) {
     return (
       <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
-        <p className="mt-2 text-gray-600">加载中...</p>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 bg-primary mx-auto"></div>
+        <p className="mt-2 text-muted-foreground">加载中...</p>
       </div>
     );
   }
@@ -82,7 +82,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             if (typeof onCancel === 'function') onCancel();
             else window.location.href = '/dashboard';
           }}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
         >
           返回
         </button>
@@ -93,13 +93,13 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
   if (questions.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">该习题还没有题目</p>
+        <p className="text-muted-foreground">该习题还没有题目</p>
         <button
           onClick={() => {
             if (typeof onCancel === 'function') onCancel();
             else window.location.href = '/dashboard';
           }}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
         >
           返回
         </button>
@@ -233,13 +233,13 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                 className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                   currentAnswer === option.content
                     ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-border hover:border-primary/50'
                 }`}
               >
                 <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-4 flex-shrink-0 font-semibold text-sm ${
                   currentAnswer === option.content
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   {String.fromCharCode(65 + idx)}
                 </span>
@@ -266,13 +266,13 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                 className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                   selectedOptions.includes(option.content)
                     ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-border hover:border-primary/50'
                 }`}
               >
                 <span className={`w-8 h-8 flex items-center justify-center rounded-full mr-4 flex-shrink-0 font-semibold text-sm ${
                   selectedOptions.includes(option.content)
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 }`}>
                   {String.fromCharCode(65 + idx)}
                 </span>
@@ -300,7 +300,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               className={`flex-1 p-4 border rounded-lg cursor-pointer text-center transition-colors ${
                 currentAnswer === 'true'
                   ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-border hover:border-primary/50'
               }`}
             >
               <input
@@ -316,7 +316,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               className={`flex-1 p-4 border rounded-lg cursor-pointer text-center transition-colors ${
                 currentAnswer === 'false'
                   ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-gray-200 hover:border-gray-300'
+                  : 'border-border hover:border-primary/50'
               }`}
             >
               <input
@@ -340,7 +340,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             <div className="space-y-3">
               {Array.from({ length: blankCount }, (_, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-500 w-10 flex-shrink-0">
+                  <span className="text-sm font-medium text-muted-foreground w-10 flex-shrink-0">
                     空{i + 1}
                   </span>
                   <input
@@ -351,7 +351,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
                       newAnswers[i] = e.target.value;
                       handleAnswerChange(newAnswers);
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                    className="flex-1 px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                     placeholder={`输入第 ${i + 1} 个空`}
                   />
                 </div>
@@ -365,7 +365,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             type="text"
             value={(currentAnswer as string) || ''}
             onChange={(e) => handleAnswerChange(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             placeholder="输入答案"
           />
         );
@@ -376,7 +376,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             value={(currentAnswer as string) || ''}
             onChange={(e) => handleAnswerChange(e.target.value)}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
             placeholder="输入答案"
           />
         );
@@ -389,12 +389,12 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+      <div className="bg-background border border-border rounded-lg shadow-sm p-4 mb-6">
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-xl font-semibold">{quiz.title}</h1>
-          <div className="text-gray-600">{formatTime(timeElapsed)}</div>
+          <div className="text-muted-foreground">{formatTime(timeElapsed)}</div>
         </div>
-        <div className="flex justify-between items-center text-sm text-gray-600 mb-2">
+        <div className="flex justify-between items-center text-sm text-muted-foreground mb-2">
           <span>
             题目 {currentIndex + 1} / {questions.length}
           </span>
@@ -402,21 +402,21 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             已答 {answers.size} / {questions.length}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-muted rounded-full h-2">
           <div
-            className="bg-indigo-600 h-2 rounded-full transition-all"
+            className="bg-primary h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Question */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="bg-background border border-border rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-start space-x-2 mb-4">
           <span className="font-medium text-lg">{currentIndex + 1}.</span>
           <div className="flex-1">
             <p className="text-lg mb-1">{currentQuestion.content}</p>
-            <span className="text-sm text-gray-500">({currentQuestion.points}分)</span>
+            <span className="text-sm text-muted-foreground">({currentQuestion.points}分)</span>
           </div>
         </div>
         {renderQuestion()}
@@ -427,7 +427,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800"
+          className="px-4 py-2 text-muted-foreground hover:text-foreground"
         >
           放弃答题
         </button>
@@ -436,7 +436,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             type="button"
             onClick={handlePrevious}
             disabled={currentIndex === 0}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-border rounded-lg hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
           >
             上一题
           </button>
@@ -444,7 +444,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
             <button
               type="button"
               onClick={handleNext}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90"
             >
               下一题
             </button>
@@ -463,7 +463,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
 
       {/* Submit error */}
       {submitError && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center justify-between">
+        <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 dark:bg-red-950 dark:border-red-800 dark:text-red-300 rounded-lg text-sm flex items-center justify-between">
           <span>{submitError}</span>
           <button
             onClick={() => setSubmitError(null)}
@@ -475,8 +475,8 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
       )}
 
       {/* Question Navigator */}
-      <div className="mt-6 bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">题目导航</h3>
+      <div className="mt-6 bg-background border border-border rounded-lg shadow-sm p-4">
+        <h3 className="text-sm font-medium text-foreground mb-3">题目导航</h3>
         <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
           {questions.map((q, index) => (
             <button
@@ -485,10 +485,10 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
               onClick={() => setCurrentIndex(index)}
               className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
                 index === currentIndex
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : answers.has(q.id)
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                  : 'bg-muted text-foreground hover:bg-accent'
               }`}
             >
               {index + 1}

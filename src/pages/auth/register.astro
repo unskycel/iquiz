@@ -10,51 +10,51 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
   
   <form id="register-form" class="space-y-4">
     <div>
-      <label for="displayName" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+      <label for="displayName" class="block text-sm font-medium text-foreground mb-1">用户名</label>
       <input
         type="text"
         id="displayName"
         name="displayName"
         required
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+        class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-background text-foreground"
         placeholder="你的用户名"
       />
     </div>
     
     <div>
-      <label for="email" class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+      <label for="email" class="block text-sm font-medium text-foreground mb-1">邮箱</label>
       <input
         type="email"
         id="email"
         name="email"
         required
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+        class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-background text-foreground"
         placeholder="your@email.com"
       />
     </div>
     
     <div>
-      <label for="password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+      <label for="password" class="block text-sm font-medium text-foreground mb-1">密码</label>
       <input
         type="password"
         id="password"
         name="password"
         required
         minlength="6"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+        class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-background text-foreground"
         placeholder="至少6位密码"
       />
     </div>
     
     <div>
-      <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">确认密码</label>
+      <label for="confirmPassword" class="block text-sm font-medium text-foreground mb-1">确认密码</label>
       <input
         type="password"
         id="confirmPassword"
         name="confirmPassword"
         required
         minlength="6"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-colors"
+        class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-background text-foreground"
         placeholder="再次输入密码"
       />
     </div>
@@ -62,16 +62,16 @@ import AuthLayout from '../../layouts/AuthLayout.astro';
     <button
       type="submit"
       id="submit-btn"
-      class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+      class="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
     >
       注册
     </button>
   </form>
   
   <div class="mt-6 text-center">
-    <p class="text-gray-600">
+    <p class="text-muted-foreground">
       已有账号？
-      <a href="/auth/login" class="text-indigo-600 hover:text-indigo-500 font-medium">立即登录</a>
+      <a href="/auth/login" class="text-primary hover:opacity-80 font-medium">立即登录</a>
     </p>
   </div>
 </AuthLayout>

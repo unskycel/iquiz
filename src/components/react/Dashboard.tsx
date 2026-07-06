@@ -98,26 +98,26 @@ export function Dashboard({ userId }: DashboardProps) {
         {/* Stats skeleton */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg shadow-sm p-6">
-              <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-2" />
-              <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
+            <div key={i} className="bg-background border border-border rounded-lg shadow-sm p-6">
+              <div className="h-8 w-16 bg-muted rounded animate-pulse mb-2" />
+              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
             </div>
           ))}
         </div>
         {/* Quiz cards skeleton */}
         <div>
           <div className="flex justify-between items-center mb-4">
-            <div className="h-7 w-24 bg-gray-200 rounded animate-pulse" />
-            <div className="h-10 w-28 bg-gray-200 rounded animate-pulse" />
+            <div className="h-7 w-24 bg-muted rounded animate-pulse" />
+            <div className="h-10 w-28 bg-muted rounded animate-pulse" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-sm p-6">
-                <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse mb-3" />
-                <div className="h-4 w-full bg-gray-100 rounded animate-pulse mb-4" />
+              <div key={i} className="bg-background border border-border rounded-lg shadow-sm p-6">
+                <div className="h-6 w-3/4 bg-muted rounded animate-pulse mb-3" />
+                <div className="h-4 w-full bg-muted rounded animate-pulse mb-4" />
                 <div className="flex space-x-2">
-                  <div className="h-9 flex-1 bg-gray-100 rounded animate-pulse" />
-                  <div className="h-9 flex-1 bg-gray-100 rounded animate-pulse" />
+                  <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
+                  <div className="h-9 flex-1 bg-muted rounded animate-pulse" />
                 </div>
               </div>
             ))}
@@ -135,21 +135,21 @@ export function Dashboard({ userId }: DashboardProps) {
     <div className="space-y-8">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
           <div className="text-2xl font-bold text-indigo-600">{stats.totalQuizzes}</div>
-          <div className="text-gray-600">习题总数</div>
+          <div className="text-muted-foreground">习题总数</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
           <div className="text-2xl font-bold text-green-600">{stats.completedAttempts}</div>
-          <div className="text-gray-600">已完成</div>
+          <div className="text-muted-foreground">已完成</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
           <div className="text-2xl font-bold text-yellow-600">{stats.averageScore}%</div>
-          <div className="text-gray-600">平均分数</div>
+          <div className="text-muted-foreground">平均分数</div>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-background border border-border rounded-lg shadow-sm p-6">
           <div className="text-2xl font-bold text-purple-600">{stats.totalTime}分钟</div>
-          <div className="text-gray-600">学习时长</div>
+          <div className="text-muted-foreground">学习时长</div>
         </div>
       </div>
 
@@ -159,34 +159,34 @@ export function Dashboard({ userId }: DashboardProps) {
           <h2 className="text-xl font-semibold">我的习题</h2>
           <a
             href="/quiz/create"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
           >
             创建新习题
           </a>
         </div>
 
         {quizzes.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
+          <div className="bg-background border border-border rounded-lg shadow-sm p-8 text-center text-muted-foreground">
             还没有创建任何习题
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {quizzes.map((quiz) => (
-              <div key={quiz.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+              <div key={quiz.id} className="bg-background border border-border rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
                 <h3 className="font-semibold text-lg mb-2">{quiz.title}</h3>
                 {quiz.description && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{quiz.description}</p>
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{quiz.description}</p>
                 )}
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>{formatDate(quiz.created_at)}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${quiz.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs ${quiz.is_published ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-muted text-foreground'}`}>
                     {quiz.is_published ? '已发布' : '草稿'}
                   </span>
                 </div>
                 <div className="mt-4 flex space-x-2">
                   <a
                     href={`/quiz/${quiz.id}`}
-                    className="flex-1 text-center py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                    className="flex-1 text-center py-2 border border-border rounded-lg hover:bg-accent text-sm"
                   >
                     编辑
                   </a>
@@ -198,7 +198,7 @@ export function Dashboard({ userId }: DashboardProps) {
                   </a>
                   <a
                     href={`/quiz/${quiz.id}/take`}
-                    className="flex-1 text-center py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"
+                    className="flex-1 text-center py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 text-sm"
                   >
                     开始答题
                   </a>
@@ -213,23 +213,23 @@ export function Dashboard({ userId }: DashboardProps) {
       <div>
         <h2 className="text-xl font-semibold mb-4">最近答题记录</h2>
         {attempts.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
+          <div className="bg-background border border-border rounded-lg shadow-sm p-8 text-center text-muted-foreground">
             还没有答题记录
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+          <div className="bg-background border border-border rounded-lg shadow-sm overflow-x-auto">
             <table className="w-full min-w-[500px]">
-              <thead className="bg-gray-50">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">习题</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分数</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">用时</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">日期</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">习题</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">分数</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">用时</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">日期</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {attempts.map((attempt) => (
-                  <tr key={attempt.id} className="hover:bg-gray-50">
+                  <tr key={attempt.id} className="hover:bg-accent">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <a href={`/quiz/attempts/${attempt.id}`} className="text-indigo-600 hover:text-indigo-700">
                         {attempt.quizzes.title}
@@ -240,10 +240,10 @@ export function Dashboard({ userId }: DashboardProps) {
                         {attempt.score || 0}/{attempt.total_points}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                       {formatTime(attempt.time_taken)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                    <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
                       {attempt.completed_at ? formatDate(attempt.completed_at) : '-'}
                     </td>
                   </tr>
