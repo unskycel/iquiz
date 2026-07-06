@@ -17,6 +17,8 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [allExpanded, setAllExpanded] = useState(false);
 
   useEffect(() => {
     loadAttempt();
@@ -180,7 +182,25 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
 
       {/* Answers */}
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold px-1">答题详情</h2>
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-lg font-semibold">答题详情</h2>
+          {answers.length > 1 && (
+            <button
+              onClick={() => {
+                if (allExpanded) {
+                  setExpandedIds(new Set());
+                  setAllExpanded(false);
+                } else {
+                  setExpandedIds(new Set(answers.map(a => a.id)));
+                  setAllExpanded(true);
+                }
+              }}
+              className="text-sm text-primary hover:text-primary-hover transition-colors"
+            >
+              {allExpanded ? '全部收起' : '全部展开'}
+            </button>
+          )}
+        </div>
         {answers.map((answer, index) => {
           const question = answer.questions;
           const rawUserAnswer = Array.isArray(answer.user_answer)
@@ -208,55 +228,81 @@ export function AttemptResults({ attemptId }: AttemptResultsProps) {
             correctAnswer = question.correct_answer as string;
           }
 
+          const isExpanded = expandedIds.has(answer.id);
+
           return (
             <div
               key={answer.id}
               className={`card border-l-4 ${
                 answer.is_correct ? 'border-l-success' : 'border-l-destructive'
-              } p-3.5 sm:p-5`}
+              } overflow-hidden`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-sm">{index + 1}.</span>
-                  <span className={`badge text-xs ${
+              <button
+                onClick={() => {
+                  setExpandedIds(prev => {
+                    const next = new Set(prev);
+                    if (next.has(answer.id)) {
+                      next.delete(answer.id);
+                    } else {
+                      next.add(answer.id);
+                    }
+                    setAllExpanded(next.size === answers.length);
+                    return next;
+                  });
+                }}
+                className="w-full p-3.5 sm:p-5 text-left flex items-start gap-2 hover:bg-accent/5 transition-colors"
+              >
+                <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+                  <span className="font-medium text-sm flex-shrink-0">{index + 1}.</span>
+                  <span className={`badge text-xs flex-shrink-0 ${
                     answer.is_correct
                       ? 'bg-success/10 text-success'
                       : 'bg-destructive/10 text-destructive'
                   }`}>
                     {answer.is_correct ? '✓' : '✗'}
                   </span>
-                  <span className="text-xs text-muted-foreground">+{answer.points_awarded || 0}分</span>
-                </div>
-                <span className="text-xs text-muted-foreground/80 flex-shrink-0">
-                  {question.type === 'single_choice' ? '单选' :
-                    question.type === 'multiple_choice' ? '多选' :
-                    question.type === 'true_false' ? '判断' :
-                    question.type === 'fill_blank' ? '填空' : '简答'}
-                </span>
-              </div>
-              
-              <p className="mb-2 text-sm sm:text-base leading-relaxed">{question.content}</p>
-              
-              <div className="space-y-1 text-xs sm:text-sm bg-muted/30 rounded-lg p-2.5">
-                <div className="flex gap-2">
-                  <span className="font-medium text-muted-foreground flex-shrink-0">你：</span>
-                  <span className={answer.is_correct ? 'text-success' : 'text-destructive'}>
-                    {userAnswer}
+                  <span className="text-xs text-muted-foreground flex-shrink-0">+{answer.points_awarded || 0}分</span>
+                  <span className="text-xs text-muted-foreground/80 flex-shrink-0">
+                    {question.type === 'single_choice' ? '单选' :
+                      question.type === 'multiple_choice' ? '多选' :
+                      question.type === 'true_false' ? '判断' :
+                      question.type === 'fill_blank' ? '填空' : '简答'}
                   </span>
+                  <p className={`text-sm leading-relaxed flex-1 min-w-0 ${isExpanded ? '' : 'line-clamp-1'}`}>
+                    {question.content}
+                  </p>
                 </div>
-                {!answer.is_correct && (
-                  <div className="flex gap-2">
-                    <span className="font-medium text-muted-foreground flex-shrink-0">正确：</span>
-                    <span className="text-success">{correctAnswer}</span>
+                <svg
+                  className={`w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+              </button>
+              {isExpanded && (
+                <div className="px-3.5 sm:px-5 pb-3.5 sm:pb-5 animate-fade-in">
+                  <div className="space-y-1 text-xs sm:text-sm bg-muted/30 rounded-lg p-2.5">
+                    <div className="flex gap-2">
+                      <span className="font-medium text-muted-foreground flex-shrink-0">你：</span>
+                      <span className={answer.is_correct ? 'text-success' : 'text-destructive'}>
+                        {userAnswer}
+                      </span>
+                    </div>
+                    {!answer.is_correct && (
+                      <div className="flex gap-2">
+                        <span className="font-medium text-muted-foreground flex-shrink-0">正确：</span>
+                        <span className="text-success">{correctAnswer}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              {question.explanation && (
-                <div className="mt-2 p-2.5 bg-warning/5 border border-warning/20 rounded-lg text-xs sm:text-sm text-foreground/80 flex gap-2">
-                  <svg className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                  </svg>
-                  <span><span className="font-medium">解析：</span>{question.explanation}</span>
+                  {question.explanation && (
+                    <div className="mt-2 p-2.5 bg-warning/5 border border-warning/20 rounded-lg text-xs sm:text-sm text-foreground/80 flex gap-2">
+                      <svg className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                      </svg>
+                      <span><span className="font-medium">解析：</span>{question.explanation}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
