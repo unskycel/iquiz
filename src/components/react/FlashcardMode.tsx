@@ -367,7 +367,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             </div>
             {/* 选择题：显示选项字母 + 选项文字 */}
             {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') && currentQuestion.question_options ? (
-              <div className="space-y-2 mb-6">
+              <div className="mb-6 space-y-2">
                 {currentQuestion.question_options
                   .filter(opt => {
                     if (Array.isArray(currentQuestion.correct_answer)) {
@@ -376,11 +376,11 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
                     return opt.is_correct || opt.option_label === currentQuestion.correct_answer;
                   })
                   .map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 border border-success/30 rounded-xl bg-success/5">
-                      <span className="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 font-semibold text-sm bg-success text-white">
+                    <div key={idx} className="flex items-center gap-2 text-lg">
+                      <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-sm font-semibold bg-success text-white">
                         {opt.option_label}
                       </span>
-                      <span className="text-success font-medium">{opt.content}</span>
+                      <span className="font-medium text-foreground">{opt.content}</span>
                     </div>
                   ))
                 }
