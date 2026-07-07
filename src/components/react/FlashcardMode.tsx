@@ -324,9 +324,9 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
 
                   return (
                     <div
-                      key={value}
+                      key={`${currentQuestion.id}-${value}`}
                       onClick={(e) => handleOptionClick(e, value)}
-                      className={`flex-1 p-4 border rounded-xl text-center relative transition-all duration-200 ${
+                      className={`flex-1 p-4 border rounded-xl text-center relative transition-all duration-200 focus:outline-none ${
                         hasAnswered ? '' : 'cursor-pointer hover:border-primary/40 hover:bg-accent/5'
                       } ${borderClass}`}
                     >
