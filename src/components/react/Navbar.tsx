@@ -145,7 +145,7 @@ export function Navbar() {
 
       {/* Mobile menu dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 glass border-b border-border/40 shadow-large z-40 py-3 px-4 animate-slide-down">
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-background border-b border-border shadow-large z-40 py-3 px-4 animate-slide-down">
           <div className="flex flex-col gap-1">
             {navLinks}
           </div>
