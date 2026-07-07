@@ -91,7 +91,7 @@ export function validateQuestion(
       const answer = question.correct_answer;
       const answerStr = Array.isArray(answer) ? String(answer[0] ?? '') : (answer == null ? '' : String(answer));
       const normalized = answerStr.trim().toLowerCase();
-      const isValid = normalized === 'true' || normalized === 'false' || normalized === 't' || normalized === 'f' || answerStr.trim() === '√' || answerStr.trim() === '×';
+      const isValid = normalized === 'true' || normalized === 'false' || normalized === 't' || normalized === 'f' || normalized === '正确' || normalized === '错误' || answerStr.trim() === '√' || answerStr.trim() === '×';
       if (!isValid) {
         errors.correctAnswer = '请选择正确或错误';
       }
