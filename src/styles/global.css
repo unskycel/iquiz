@@ -209,7 +209,7 @@
   }
 
   .glass {
-    @apply backdrop-blur-2xl bg-background/90 border border-border/50;
+    @apply backdrop-blur-[40px] backdrop-saturate-[2] bg-background/80 border border-border/50;
   }
 }
 
