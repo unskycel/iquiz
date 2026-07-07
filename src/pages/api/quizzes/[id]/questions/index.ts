@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../../lib/supabase';
 import { supabaseAdmin } from '../../../../../lib/supabase-server';
+import { normalizeBlankAnswer } from '../../../../../lib/format';
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
@@ -100,6 +101,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     const nextOrderIndex = lastQuestion ? lastQuestion.order_index + 1 : 1;
 
     // Create question
+    const normalizedAnswer = type === 'fill_blank' ? normalizeBlankAnswer(correct_answer) : correct_answer;
     const { data: question, error: questionError } = await supabaseAdmin
       .from('questions')
       .insert({
@@ -107,7 +109,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         type,
         content,
         order_index: nextOrderIndex,
-        correct_answer,
+        correct_answer: normalizedAnswer,
         points: points || 1,
         explanation,
       })

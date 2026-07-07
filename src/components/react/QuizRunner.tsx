@@ -347,7 +347,7 @@ export function QuizRunner({ quizId, quiz: initialQuiz, questions: initialQuesti
         );
 
       case 'fill_blank':
-        const blankCount = getBlankCount(currentQuestion.correct_answer, currentQuestion.content);
+        const blankCount = getBlankCount(currentQuestion.correct_answer);
         if (blankCount > 1) {
           const blankAnswers = (currentAnswer as string[]) || new Array(blankCount).fill('');
           return (

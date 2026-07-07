@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
 import { supabaseAdmin } from '../../../lib/supabase-server';
+import { normalizeBlankAnswer } from '../../../lib/format';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
@@ -122,7 +123,7 @@ export const POST: APIRoute = async ({ request }) => {
           type: q.type,
           content: q.content,
           order_index: i + 1,
-          correct_answer: q.correct_answer,
+          correct_answer: q.type === 'fill_blank' ? normalizeBlankAnswer(q.correct_answer) : q.correct_answer,
           points: q.points ?? 1,
           explanation: q.explanation ?? null,
         })

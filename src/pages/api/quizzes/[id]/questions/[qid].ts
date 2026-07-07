@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../../../lib/supabase';
+import { normalizeBlankAnswer } from '../../../../../lib/format';
 
 export const PUT: APIRoute = async ({ params, request }) => {
   try {
@@ -52,7 +53,11 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
     const updates = await request.json();
 
-    // Update question
+    // Update question — normalize fill_blank answers
+    if (updates.type === 'fill_blank' && updates.correct_answer !== undefined) {
+      updates.correct_answer = normalizeBlankAnswer(updates.correct_answer);
+    }
+
     const { data: question, error: questionError } = await supabase
       .from('questions')
       .update(updates)
