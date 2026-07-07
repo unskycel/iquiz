@@ -369,20 +369,26 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') && currentQuestion.question_options ? (
               <div className="mb-6 space-y-2">
                 {currentQuestion.question_options
-                  .filter(opt => {
-                    if (Array.isArray(currentQuestion.correct_answer)) {
-                      return (currentQuestion.correct_answer as string[]).includes(opt.option_label);
+                  .map((opt, idx) => {
+                    const letter = String.fromCharCode(65 + idx);
+                    const correctAnswer = currentQuestion.correct_answer;
+                    let isCorrect = false;
+                    if (Array.isArray(correctAnswer)) {
+                      isCorrect = correctAnswer.includes(letter);
+                    } else {
+                      isCorrect = opt.is_correct || correctAnswer === letter || correctAnswer === opt.content;
                     }
-                    return opt.is_correct || opt.option_label === currentQuestion.correct_answer;
+                    if (!isCorrect) return null;
+                    return (
+                      <div key={idx} className="flex items-center gap-2 text-lg">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-sm font-semibold bg-success text-white">
+                          {letter}
+                        </span>
+                        <span className="font-medium text-foreground">{opt.content}</span>
+                      </div>
+                    );
                   })
-                  .map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-lg">
-                      <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-sm font-semibold bg-success text-white">
-                        {opt.option_label}
-                      </span>
-                      <span className="font-medium text-foreground">{opt.content}</span>
-                    </div>
-                  ))
+                  .filter(Boolean)
                 }
               </div>
             ) : (
