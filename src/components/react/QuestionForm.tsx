@@ -136,7 +136,7 @@ export function QuestionForm({ question, index, errors = null, onUpdate, onDelet
     if (type === 'multiple_choice') {
       updates.correct_answer = [];
     } else if (type === 'true_false') {
-      updates.correct_answer = 'true';
+      updates.correct_answer = '正确';
       newOptions = [
         { id: '1', question_id: question.id, content: '正确', is_correct: true, order_index: 1 },
         { id: '2', question_id: question.id, content: '错误', is_correct: false, order_index: 2 },
@@ -328,8 +328,8 @@ export function QuestionForm({ question, index, errors = null, onUpdate, onDelet
               <label className="flex items-center">
                 <input
                   type="radio"
-                  checked={question.correct_answer === 'true'}
-                  onChange={() => onUpdate({ correct_answer: 'true' })}
+                  checked={question.correct_answer === 'true' || question.correct_answer === '正确'}
+                  onChange={() => onUpdate({ correct_answer: '正确' })}
                   className="text-primary"
                 />
                 <span className="ml-2">正确</span>
@@ -337,8 +337,8 @@ export function QuestionForm({ question, index, errors = null, onUpdate, onDelet
               <label className="flex items-center">
                 <input
                   type="radio"
-                  checked={question.correct_answer === 'false'}
-                  onChange={() => onUpdate({ correct_answer: 'false' })}
+                  checked={question.correct_answer === 'false' || question.correct_answer === '错误'}
+                  onChange={() => onUpdate({ correct_answer: '错误' })}
                   className="text-primary"
                 />
                 <span className="ml-2">错误</span>

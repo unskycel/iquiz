@@ -365,9 +365,31 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
                 正确答案
               </span>
             </div>
-            <p className="text-xl md:text-2xl font-medium leading-relaxed text-success mb-6">
-              {formatCorrectAnswer(currentQuestion.correct_answer)}
-            </p>
+            {/* 选择题：显示选项字母 + 选项文字 */}
+            {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') && currentQuestion.question_options ? (
+              <div className="space-y-2 mb-6">
+                {currentQuestion.question_options
+                  .filter(opt => {
+                    if (Array.isArray(currentQuestion.correct_answer)) {
+                      return (currentQuestion.correct_answer as string[]).includes(opt.option_label);
+                    }
+                    return opt.is_correct || opt.option_label === currentQuestion.correct_answer;
+                  })
+                  .map((opt, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 border border-success/30 rounded-xl bg-success/5">
+                      <span className="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 font-semibold text-sm bg-success text-white">
+                        {opt.option_label}
+                      </span>
+                      <span className="text-success font-medium">{opt.content}</span>
+                    </div>
+                  ))
+                }
+              </div>
+            ) : (
+              <p className="text-xl md:text-2xl font-medium leading-relaxed text-success mb-6">
+                {formatCorrectAnswer(currentQuestion.correct_answer)}
+              </p>
+            )}
             {currentQuestion.explanation && (
               <div className="mt-4 p-4 bg-warning/5 border border-warning/20 rounded-lg text-sm text-left">
                 <p className="text-muted-foreground">
