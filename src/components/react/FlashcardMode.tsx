@@ -15,6 +15,8 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [hasAnswered, setHasAnswered] = useState(false);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
@@ -50,25 +52,32 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
     }
   };
 
-  const handleNext = () => {
-    if (currentIndex < questions.length - 1) {
+  const resetQuestionState = () => {
+    setShowAnswer(false);
+    setSelectedAnswer(null);
+    setHasAnswered(false);
+  };
+
+  const goToQuestion = (index: number) => {
+    if (index !== currentIndex) {
       setIsFlipping(true);
       setTimeout(() => {
-        setShowAnswer(false);
-        setCurrentIndex(currentIndex + 1);
+        resetQuestionState();
+        setCurrentIndex(index);
         setIsFlipping(false);
       }, 150);
     }
   };
 
+  const handleNext = () => {
+    if (currentIndex < questions.length - 1) {
+      goToQuestion(currentIndex + 1);
+    }
+  };
+
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setIsFlipping(true);
-      setTimeout(() => {
-        setShowAnswer(false);
-        setCurrentIndex(currentIndex - 1);
-        setIsFlipping(false);
-      }, 150);
+      goToQuestion(currentIndex - 1);
     }
   };
 
@@ -78,6 +87,13 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
       setShowAnswer(!showAnswer);
       setIsFlipping(false);
     }, 150);
+  };
+
+  const handleOptionClick = (e: React.MouseEvent, value: string) => {
+    e.stopPropagation();
+    if (hasAnswered) return;
+    setSelectedAnswer(value);
+    setHasAnswered(true);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -179,15 +195,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             max={questions.length}
             value={currentIndex + 1}
             onChange={(e) => {
-              const idx = Number(e.target.value) - 1;
-              if (idx !== currentIndex) {
-                setIsFlipping(true);
-                setTimeout(() => {
-                  setShowAnswer(false);
-                  setCurrentIndex(idx);
-                  setIsFlipping(false);
-                }, 100);
-              }
+              goToQuestion(Number(e.target.value) - 1);
             }}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 p-0"
             aria-label="拖动跳转到指定题目"
@@ -216,42 +224,126 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             <div className="flex justify-center mb-5">
               <span className={`badge ${typeInfo.color}`}>{typeInfo.label}</span>
             </div>
-            <p className="text-xl md:text-2xl font-medium leading-relaxed mb-6">
+            <p className="text-base md:text-lg font-medium leading-relaxed mb-6">
               {currentQuestion.content}
             </p>
             
             {/* 选择题选项 */}
             {(currentQuestion.type === 'single_choice' || currentQuestion.type === 'multiple_choice') && currentQuestion.question_options && currentQuestion.question_options.length > 0 && (
               <div className="space-y-2.5 mb-6">
-                {currentQuestion.question_options.map((option, idx) => (
-                  <div
-                    key={option.id}
-                    className="flex items-center justify-start p-3 border border-border rounded-xl bg-muted/30 gap-3 text-left"
-                  >
-                    <span className="w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 font-semibold text-sm bg-muted text-muted-foreground">
-                      {String.fromCharCode(65 + idx)}
-                    </span>
-                    <span className="text-foreground">{option.content}</span>
-                  </div>
-                ))}
+                {currentQuestion.question_options.map((option, idx) => {
+                  const correctAnswer = currentQuestion.correct_answer as string;
+                  const isCorrectOpt = option.is_correct;
+                  const isSelected = selectedAnswer === option.content;
+                  const isCorrectByLetter = correctAnswer === String.fromCharCode(65 + idx);
+
+                  let borderClass = 'border-border bg-muted/30';
+                  let letterClass = 'bg-muted text-muted-foreground';
+                  let iconEl = null;
+
+                  if (hasAnswered) {
+                    if (isCorrectOpt || isCorrectByLetter) {
+                      borderClass = 'border-success bg-success/10';
+                      letterClass = 'bg-success text-success-foreground';
+                      iconEl = (
+                        <svg className="w-5 h-5 text-success ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                      );
+                    } else if (isSelected) {
+                      borderClass = 'border-destructive bg-destructive/10';
+                      letterClass = 'bg-destructive text-destructive-foreground';
+                      iconEl = (
+                        <svg className="w-5 h-5 text-destructive ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      );
+                    } else {
+                      borderClass = 'border-border opacity-40';
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={option.id}
+                      onClick={(e) => handleOptionClick(e, option.content)}
+                      className={`flex items-center justify-start p-3 border rounded-xl gap-3 text-left transition-all duration-200 ${
+                        hasAnswered ? '' : 'cursor-pointer hover:border-primary/40 hover:bg-accent/5'
+                      } ${borderClass}`}
+                    >
+                      <span className={`w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 font-semibold text-sm transition-all ${letterClass}`}>
+                        {String.fromCharCode(65 + idx)}
+                      </span>
+                      <span className="text-foreground">{option.content}</span>
+                      {iconEl}
+                    </div>
+                  );
+                })}
               </div>
             )}
             
             {/* 判断题选项 */}
             {currentQuestion.type === 'true_false' && (
               <div className="flex gap-3 mb-6">
-                <div className="flex-1 p-4 border border-border rounded-xl bg-muted/30 text-center">
-                  <svg className="w-6 h-6 mx-auto mb-1 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
-                  <span className="text-sm text-muted-foreground">正确</span>
-                </div>
-                <div className="flex-1 p-4 border border-border rounded-xl bg-muted/30 text-center">
-                  <svg className="w-6 h-6 mx-auto mb-1 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <span className="text-sm text-muted-foreground">错误</span>
-                </div>
+                {[
+                  { value: '正确', icon: 'check' },
+                  { value: '错误', icon: 'cross' },
+                ].map(({ value, icon }) => {
+                  const isCorrectAnswer = (currentQuestion.correct_answer as string) === value;
+                  const isSelected = selectedAnswer === value;
+
+                  let borderClass = 'border-border bg-muted/30';
+                  let iconColor = 'text-muted-foreground';
+                  let statusIcon = null;
+
+                  if (hasAnswered) {
+                    if (isCorrectAnswer) {
+                      borderClass = 'border-success bg-success/10';
+                      iconColor = 'text-success';
+                      statusIcon = (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-success flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                          </svg>
+                        </div>
+                      );
+                    } else if (isSelected) {
+                      borderClass = 'border-destructive bg-destructive/10';
+                      iconColor = 'text-destructive';
+                      statusIcon = (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-destructive flex items-center justify-center">
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                      );
+                    } else {
+                      borderClass = 'border-border opacity-40';
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={value}
+                      onClick={(e) => handleOptionClick(e, value)}
+                      className={`flex-1 p-4 border rounded-xl text-center relative transition-all duration-200 ${
+                        hasAnswered ? '' : 'cursor-pointer hover:border-primary/40 hover:bg-accent/5'
+                      } ${borderClass}`}
+                    >
+                      <svg className={`w-6 h-6 mx-auto mb-1 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                        {icon === 'check' ? (
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        ) : (
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        )}
+                      </svg>
+                      <span className={`text-sm ${hasAnswered && isCorrectAnswer ? 'text-success font-medium' : hasAnswered && isSelected ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                        {value}
+                      </span>
+                      {statusIcon}
+                    </div>
+                  );
+                })}
               </div>
             )}
             
@@ -260,7 +352,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
-              点击卡片查看答案
+              {hasAnswered ? '点击卡片查看解析' : '点击选项作答，或点击卡片查看答案'}
             </p>
           </div>
         ) : (
@@ -312,14 +404,7 @@ export function FlashcardMode({ quizId, quizTitle }: FlashcardModeProps) {
             {questions.map((q, index) => (
               <button
                 key={q.id}
-                onClick={() => {
-                  setIsFlipping(true);
-                  setTimeout(() => {
-                    setShowAnswer(false);
-                    setCurrentIndex(index);
-                    setIsFlipping(false);
-                  }, 150);
-                }}
+                onClick={() => goToQuestion(index)}
                 className={`w-2 h-2 rounded-full flex-shrink-0 transition-all duration-200 ${
                   index === currentIndex
                     ? 'bg-primary w-6'
