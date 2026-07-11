@@ -19,7 +19,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.45.0",
-    "astro": "^5.7.10",
+    "astro": "^7.0.7",
     "clsx": "^2.1.1",
     "dexie": "^4.0.8",
     "react": "^19.0.0",
